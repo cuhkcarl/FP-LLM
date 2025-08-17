@@ -1,0 +1,31 @@
+name: Weekly predictions
+
+on:
+  schedule:
+    - cron: "0 3 * * 4"  # Thu 11:00 SHA
+    - cron: "0 3 * * 5"  # Fri 11:00 SHA
+  workflow_dispatch:
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install uv
+        run: pip install -U uv
+      - name: Install deps
+        run: uv pip install -e ".[dev]" -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple
+      - name: Build features & predictions
+        run: |
+          uv run python scripts/build_features.py --gw 1 --k 3
+          uv run python scripts/predict_points.py --gw 1
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: weekly/predictions
+          title: "Weekly: features & predictions"
+          commit-message: "chore(data): weekly features & predictions"
+          body: "Auto-generated features & predictions."

@@ -1,0 +1,6 @@
+prediction:
+  mode: "baseline"
+  min_availability: 0.15
+  availability_power: 1.0
+  base_by_pos: { GK: 3.4, DEF: 3.7, MID: 4.5, FWD: 4.8 }
+  spread_by_pos: { GK: 1.1, DEF: 1.2, MID: 1.4, FWD: 1.4 }
