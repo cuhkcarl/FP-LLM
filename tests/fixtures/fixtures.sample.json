@@ -1,0 +1,12 @@
+[
+    {
+      "id": 9001,
+      "event": 1,
+      "kickoff_time": "2025-08-16T14:00:00Z",
+      "finished": false,
+      "team_h": 1,
+      "team_a": 2,
+      "team_h_difficulty": 2,
+      "team_a_difficulty": 3
+    }
+  ]

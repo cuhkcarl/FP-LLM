@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fpl-optimizer"
+name = "fp-llm-otherfucker"
 version = "0.1.0"
-description = "FPL optimizer: data→predict→optimize→report"
+description = "FPLLMotherfucker: data→predict→optimize→report"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -14,6 +14,9 @@ authors = [{ name = "YOUR_NAME" }]
 dependencies = [
     "typer>=0.12",
     "pydantic>=2.7",
+    "requests>=2.32",
+    "pandas>=2.2",
+    "pyarrow>=16",
 ]
 
 [project.optional-dependencies]
@@ -25,16 +28,24 @@ dev = [
     "isort>=5.13",
     "mypy>=1.10",
     "types-requests>=2.32.0.20240622",
+    "responses>=0.25",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = { find = { where = ["src"] } }
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-select = ["E","F","I","UP","B"]
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/fetch_fpl.py" = ["B008"]
+"scripts/build_features.py" = ["B008"]
 
 [tool.black]
 line-length = 100

@@ -1,0 +1,72 @@
+{
+    "elements": [
+      {
+        "id": 101,
+        "web_name": "Ramsdale",
+        "first_name": "Aaron",
+        "second_name": "Ramsdale",
+        "team": 1,
+        "element_type": 1,
+        "now_cost": 50,
+        "status": "a",
+        "minutes": 2700,
+        "total_points": 140,
+        "form": "3.2",
+        "selected_by_percent": "25.4",
+        "chance_of_playing_next_round": 100,
+        "news": ""
+      },
+      {
+        "id": 202,
+        "web_name": "Gabriel",
+        "first_name": "Gabriel",
+        "second_name": "Magalhaes",
+        "team": 1,
+        "element_type": 2,
+        "now_cost": 55,
+        "status": "a",
+        "minutes": 2900,
+        "total_points": 150,
+        "form": "4.5",
+        "selected_by_percent": "18.1",
+        "chance_of_playing_next_round": 100,
+        "news": ""
+      },
+      {
+        "id": 303,
+        "web_name": "Saka",
+        "first_name": "Bukayo",
+        "second_name": "Saka",
+        "team": 1,
+        "element_type": 3,
+        "now_cost": 90,
+        "status": "a",
+        "minutes": 3000,
+        "total_points": 200,
+        "form": "6.1",
+        "selected_by_percent": "45.0",
+        "chance_of_playing_next_round": 100,
+        "news": ""
+      },
+      {
+        "id": 404,
+        "web_name": "Watkins",
+        "first_name": "Ollie",
+        "second_name": "Watkins",
+        "team": 2,
+        "element_type": 4,
+        "now_cost": 82,
+        "status": "a",
+        "minutes": 3000,
+        "total_points": 190,
+        "form": "5.8",
+        "selected_by_percent": "35.1",
+        "chance_of_playing_next_round": 100,
+        "news": ""
+      }
+    ],
+    "teams": [
+      { "id": 1, "name": "Arsenal", "short_name": "ARS" },
+      { "id": 2, "name": "Aston Villa", "short_name": "AVL" }
+    ]
+  }
