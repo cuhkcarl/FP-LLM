@@ -1,3 +1,10 @@
+season: 2025_26
+current_gw: 1
+
+blacklist:
+  names: ["Mohamed Salah", "Erling Haaland"]  # 示例：禁用超高价球员
+  price_min: 13.0
+
 prediction:
   mode: "baseline"
   min_availability: 0.15

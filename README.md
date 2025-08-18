@@ -71,6 +71,19 @@ python scripts/predict_points.py --gw 1 --min-availability 0.15 --availability-p
 # data/processed/predictions_gw01.parquet
 ```
 
+### 4) 优化器与转会（M4）
+```bash
+# 准备阵容文件（示例见 configs/squad.sample.yaml）
+cp configs/squad.sample.yaml configs/squad.yaml
+# 替换其中的 player_id / bank / free_transfers
+
+# 生成预测
+python scripts/predict_points.py --gw 1
+
+# 运行优化器（首发 + 转会建议）
+python scripts/optimize_squad.py --gw 1 --squad configs/squad.yaml --pool-size 12 --max-transfers 2 --hit-cost 4
+```
+
 ---
 
 ## 目录结构（核心）

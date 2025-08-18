@@ -17,6 +17,8 @@ dependencies = [
     "requests>=2.32",
     "pandas>=2.2",
     "pyarrow>=16",
+    "PuLP>=2.9",
+    "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -50,6 +52,19 @@ ignore = ["E501"]
 [tool.black]
 line-length = 100
 target-version = ["py311"]
+exclude = '''
+/(
+  \.fpllm
+  | \.venv
+  | venv
+  | build
+  | dist
+  | \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.ruff_cache
+)/
+'''
 
 [tool.isort]
 profile = "black"
