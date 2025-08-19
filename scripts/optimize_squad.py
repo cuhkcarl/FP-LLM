@@ -8,7 +8,8 @@ import typer
 import yaml
 
 from optimizer.chips import ChipThresholds, suggest_chips
-from optimizer.ilp import solve_starting_xi
+from optimizer.dgw import DGWParams, adjust_expected_points_for_gw
+from optimizer.ilp import BenchOrderParams, solve_starting_xi
 from optimizer.transfers import best_transfers, load_squad_yaml
 
 app = typer.Typer(add_completion=False)
@@ -60,13 +61,20 @@ def main(
             help="是否遵从 configs/base.yaml 的黑名单/高价阈值",
         ),
     ] = True,
+    use_dgw_adjust: Annotated[
+        bool,
+        typer.Option("--use-dgw-adjust/--no-dgw-adjust", help="是否对双赛/上场风险做期望分调整"),
+    ] = True,
+    bench_weight_availability: Annotated[
+        float, typer.Option(help="替补排序中 availability 的权重（默认 0.5）")
+    ] = 0.5,
     suggest_chips_flag: Annotated[
         bool,
         typer.Option("--suggest-chips/--no-suggest-chips", help="是否输出筹码建议"),
     ] = True,
 ):
     """
-    M4：基于预测结果与当前 15 人阵容，给出首发/队长、0/1/2 次转会建议，并（可选）输出筹码启发式建议。
+    M4：基于预测结果与当前 15 人阵容，给出首发/队长、0/1/2 次转会建议，并（可选）输出筹码与 DGW 调整。
     """
     # 读取预测
     in_name = f"predictions_gw{gw:02d}.parquet" if gw is not None else "predictions.parquet"
@@ -77,13 +85,20 @@ def main(
     fixtures_path = data_dir / "interim" / "fixtures_clean.parquet"
     fixtures = pd.read_parquet(fixtures_path) if fixtures_path.exists() else None
 
+    # DGW / 可用性调整（只影响本次优化的期望分，不改动源文件）
+    if use_dgw_adjust and gw is not None and fixtures is not None:
+        preds = adjust_expected_points_for_gw(preds, fixtures, gw, DGWParams())
+
     # 读取 squad
     squad = load_squad_yaml(squad_file)
     current_ids = [int(x) for x in squad.player_ids]
 
-    # 当前阵容的首发与队长
+    # 当前阵容的首发与队长（带替补排序参数）
     squad_pred = preds[preds["player_id"].isin(current_ids)].copy()
-    xi = solve_starting_xi(squad_pred)
+    xi = solve_starting_xi(
+        squad_pred,
+        bench_params=BenchOrderParams(weight_availability=bench_weight_availability),
+    )
 
     # 黑名单（可选）
     blacklist_names: list[str] | None = None

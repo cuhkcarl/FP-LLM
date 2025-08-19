@@ -71,7 +71,7 @@ python scripts/predict_points.py --gw 1 --min-availability 0.15 --availability-p
 # data/processed/predictions_gw01.parquet
 ```
 
-### 4) 优化器与转会（M4）
+### 4) 优化器与转会（M4）（含 DGW 与替补排序）
 ```bash
 # 准备阵容文件（示例见 configs/squad.sample.yaml）
 cp configs/squad.sample.yaml configs/squad.yaml
@@ -80,9 +80,16 @@ cp configs/squad.sample.yaml configs/squad.yaml
 # 生成预测
 python scripts/predict_points.py --gw 1
 
-# 运行优化器（首发 + 转会建议）
-python scripts/optimize_squad.py --gw 1 --squad configs/squad.yaml --pool-size 12 --max-transfers 2 --hit-cost 4
+# 默认开启 DGW 调整，可关闭
+python scripts/optimize_squad.py --gw 1 --squad configs/squad.yaml \
+  --use-dgw-adjust \
+  --bench-weight-availability 0.5 \
+  --respect-blacklist
 ```
+- `--use-dgw-adjust/--no-dgw-adjust`：是否对双赛/上场风险做期望分调整（默认开）
+- `--bench-weight-availability`：替补排序中 `availability_score` 的权重（默认 0.5）
+- `--respect-blacklist/--no-respect-blacklist`：是否遵从 `configs/base.yaml` 的黑名单/高价过滤
+
 
 ### 5) 优化器 + 筹码建议 + 报告
 ```bash
@@ -96,6 +103,10 @@ python scripts/optimize_squad.py --gw 1 --squad configs/squad.yaml --pool-size 1
 python scripts/generate_report.py --gw 1
 # 输出：reports/gw01/report.md
 ```
+- `reports/gwXX/report.md`：人类可读报告
+- `reports/gwXX/summary.json`：结构化摘要（XI/C/VC/bench EP、转会、筹码、阈值）
+
+
 
 ---
 
