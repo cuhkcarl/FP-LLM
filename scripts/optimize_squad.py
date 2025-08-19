@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import pandas as pd
 import typer
@@ -12,6 +12,33 @@ from optimizer.ilp import solve_starting_xi
 from optimizer.transfers import best_transfers, load_squad_yaml
 
 app = typer.Typer(add_completion=False)
+
+
+def _name_lookup(preds: pd.DataFrame):
+    pidx = preds.set_index("player_id")
+
+    def name(pid: int) -> str:
+        return str(pidx.loc[pid, "web_name"]) if pid in pidx.index else str(pid)
+
+    return name
+
+
+def _load_blacklist(cfg_path: Path) -> tuple[list[str] | None, float | None]:
+    if not cfg_path.exists():
+        return None, None
+    try:
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg: dict[str, Any] = yaml.safe_load(f) or {}
+        bl = cfg.get("blacklist") or {}
+        names = bl.get("names")
+        price_min = bl.get("price_min")
+        if isinstance(names, list) and len(names) == 0:
+            names = None
+        if price_min is not None:
+            price_min = float(price_min)
+        return names, price_min
+    except Exception:
+        return None, None
 
 
 @app.command()
@@ -26,8 +53,16 @@ def main(
     pool_size: Annotated[int, typer.Option(help="候选池每位置大小（转会枚举）")] = 12,
     max_transfers: Annotated[int, typer.Option(help="最大转会数（含付费）")] = 2,
     hit_cost: Annotated[int, typer.Option(help="每次付费转会的扣分")] = 4,
+    respect_blacklist: Annotated[
+        bool,
+        typer.Option(
+            "--respect-blacklist/--no-respect-blacklist",
+            help="是否遵从 configs/base.yaml 的黑名单/高价阈值",
+        ),
+    ] = True,
     suggest_chips_flag: Annotated[
-        bool, typer.Option("--suggest-chips/--no-suggest-chips", help="是否输出筹码建议")
+        bool,
+        typer.Option("--suggest-chips/--no-suggest-chips", help="是否输出筹码建议"),
     ] = True,
 ):
     """
@@ -50,6 +85,13 @@ def main(
     squad_pred = preds[preds["player_id"].isin(current_ids)].copy()
     xi = solve_starting_xi(squad_pred)
 
+    # 黑名单（可选）
+    blacklist_names: list[str] | None = None
+    blacklist_price_min: float | None = None
+    if respect_blacklist:
+        bl_names, bl_price = _load_blacklist(Path("configs/base.yaml"))
+        blacklist_names, blacklist_price_min = bl_names, bl_price
+
     # 转会枚举
     result = best_transfers(
         preds,
@@ -57,13 +99,12 @@ def main(
         pool_size=pool_size,
         max_transfers=max_transfers,
         hit_cost=hit_cost,
+        blacklist_names=blacklist_names,
+        blacklist_price_min=blacklist_price_min,
     )
 
     # 输出摘要
-    pidx = preds.set_index("player_id")
-
-    def name(pid: int) -> str:
-        return str(pidx.loc[pid, "web_name"]) if pid in pidx.index else str(pid)
+    name = _name_lookup(preds)
 
     typer.echo("\n=== Current XI (with captain) ===")
     typer.echo(f"Formation: {xi['formation']}")
@@ -84,15 +125,7 @@ def main(
         typer.echo(f"Net gain vs baseline (after hits): {bp['net_gain']:.2f}")
 
     if suggest_chips_flag and gw is not None:
-        # 从 squad.yaml 读取可用筹码与 configs/base.yaml 的阈值
-        chips_available = {}
-        try:
-            with open(squad_file, encoding="utf-8") as f:
-                sdata = yaml.safe_load(f) or {}
-            chips_available = sdata.get("chips_available") or {}
-        except Exception:
-            chips_available = {}
-
+        # 读取 chips 阈值
         thresholds = ChipThresholds()
         cfg_path = Path("configs/base.yaml")
         if cfg_path.exists():
@@ -129,7 +162,9 @@ def main(
             starting_ids=xi["starting_ids"],
             bench_ids=xi["bench_ids"],
             captain_id=xi["captain_id"],
-            chips_available=chips_available,
+            chips_available=(
+                getattr(squad, "chips_available", {}) if hasattr(squad, "chips_available") else {}
+            ),
             thresholds=thresholds,
         )
 
