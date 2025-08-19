@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import pandas as pd
 import typer
@@ -24,6 +25,24 @@ def _name_map(preds: pd.DataFrame):
     )
 
 
+def _load_blacklist(cfg_path: Path) -> tuple[list[str] | None, float | None]:
+    if not cfg_path.exists():
+        return None, None
+    try:
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg: dict[str, Any] = yaml.safe_load(f) or {}
+        bl = cfg.get("blacklist") or {}
+        names = bl.get("names")
+        price_min = bl.get("price_min")
+        if isinstance(names, list) and len(names) == 0:
+            names = None
+        if price_min is not None:
+            price_min = float(price_min)
+        return names, price_min
+    except Exception:
+        return None, None
+
+
 @app.command()
 def main(
     gw: Annotated[int, typer.Option(help="生成报告的 GW")],
@@ -41,8 +60,22 @@ def main(
 
     xi = solve_starting_xi(current_pred)
 
-    # transfers
-    res = best_transfers(preds, squad)
+    # transfers（尊重黑名单/高价阈值，与 CLI 行为保持一致）
+    bl_names: list[str] | None = None
+    bl_price_min: float | None = None
+    cfg_path = Path("configs/base.yaml")
+    if cfg_path.exists():
+        n, p = _load_blacklist(cfg_path)
+        bl_names, bl_price_min = n, p
+    res = best_transfers(
+        preds,
+        squad,
+        blacklist_names=bl_names,
+        blacklist_price_min=bl_price_min,
+        price_now_market=preds.set_index("player_id")["price_now"].to_dict(),
+        purchase_prices={},  # 报告不掌握买入价，回退为当前价（仅用于共同口径展示）
+        value_weight=0.0,
+    )
     bp = res["best_plan"]
 
     # chips
@@ -121,6 +154,9 @@ def main(
 
     lines.append("## Transfers Suggestion")
     lines.append(f"- Baseline XI pts: **{res['baseline_points']:.2f}**")
+    lines.append(
+        f"- Team Value (now → after): **{res['best_plan']['team_value_now']:.2f} → {res['best_plan']['team_value_after']:.2f}**"
+    )
     if bp["transfers"] == 0:
         lines.append("- **Best plan**: Keep (0 transfers).")
     else:
@@ -143,6 +179,63 @@ def main(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     typer.echo(f"✅ wrote {out_path}")
+
+    # 写 summary.json（结构化指标）
+    summary = {
+        "gw": int(gw),
+        "xi": {
+            "starting_ids": xi["starting_ids"],
+            "bench_ids": xi["bench_ids"],
+            "captain_id": xi["captain_id"],
+            "vice_id": xi["vice_id"],
+            "expected_points_xi_with_captain": float(xi["expected_points_xi_with_captain"]),
+            "bench_ep": float(bench_ep),
+        },
+        "transfers": {
+            "baseline_points": float(res["baseline_points"]),
+            "transfers": int(bp["transfers"]),
+            "out_ids": [int(x) for x in bp["out_ids"]],
+            "in_ids": [int(x) for x in bp["in_ids"]],
+            "hit_cost": int(bp["hit_cost"]),
+            "new_points": float(bp["new_points"]),
+            "net_gain": float(bp["net_gain"]),
+            "bank_after": float(bp.get("bank_after", 0.0)),
+            "team_value_now": float(bp.get("team_value_now", 0.0)),
+            "team_value_after": float(bp.get("team_value_after", 0.0)),
+            "team_value_delta": float(bp.get("team_value_delta", 0.0)),
+        },
+        "chips": chips,
+        "thresholds": {
+            "bench_boost_min_bench_ep": float(thresholds.bench_boost_min_bench_ep),
+            "triple_captain_min_ep": float(thresholds.triple_captain_min_ep),
+            "triple_captain_min_ep_if_double": float(thresholds.triple_captain_min_ep_if_double),
+            "free_hit_min_active_starters": int(thresholds.free_hit_min_active_starters),
+        },
+        "blacklist": {"names": bl_names, "price_min": bl_price_min},
+    }
+
+    # 可选：带上优化器默认参数（若存在）
+    try:
+        opt_cfg: dict[str, Any] = {}
+        cfg_path = Path("configs/base.yaml")
+        if cfg_path.exists():
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg: dict[str, Any] = yaml.safe_load(f) or {}
+            opt_cfg = cfg.get("optimizer") or {}
+        summary["optimizer"] = {
+            "value_weight": float(opt_cfg.get("value_weight", 0.0)),
+            "min_bank_after": opt_cfg.get("min_bank_after"),
+            "max_tv_drop": opt_cfg.get("max_tv_drop"),
+        }
+    except Exception:
+        pass
+
+    summary_path = out_dir / f"gw{gw:02d}" / "summary.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    typer.echo(f"✅ wrote {summary_path}")
 
 
 if __name__ == "__main__":
