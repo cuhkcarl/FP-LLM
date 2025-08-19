@@ -97,6 +97,10 @@ python scripts/generate_report.py --gw 1
 # 输出：reports/gw01/report.md
 ```
 
+### 6) 报告产物
+- `reports/gwXX/report.md`：人类可读报告
+- `reports/gwXX/summary.json`：结构化摘要（XI/C/VC/bench EP、转会、筹码、阈值），用于看板/回测
+
 ---
 
 ## 目录结构（核心）
