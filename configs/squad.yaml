@@ -27,3 +27,7 @@ chips_available:
   free_hit: true
   bench_boost: true
   triple_captain: true
+
+purchase_prices:
+  123: 7.0
+  456: 4.5
