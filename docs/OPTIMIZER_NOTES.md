@@ -52,3 +52,16 @@ python scripts/optimize_squad.py --gw 1 \
 - 候选池裁剪（按赛程窗口、出场稳定性）
 - 更智能的 Bench 顺序（主客/对手难度/分钟风险）
 - 筹码决策（M5）：双赛/空白、BB、WC、FH、TC 启发式
+
+# Chips Heuristics (M5)
+
+- **Bench Boost**：替补四人期望分 ≥ 阈值（默认 20）则建议；双赛周替补强时更偏向建议。
+- **Triple Captain**：队长期望分 ≥ 9（单赛）或 ≥ 7.5（双赛）建议开启。
+- **Free Hit**：预测可上场人数 < 9 则建议考虑（空白周兜底）。
+- **Wildcard**：默认不自动触发（需结构性判断：长期赛程、资金、队伍分布等）。
+
+阈值在 `configs/base.yaml -> chips.thresholds` 可调。
+
+# Report (M6)
+`scripts/generate_report.py --gw XX` 生成
+`reports/gwXX/report.md`：包含首发/阵型、C/VC、替补、转会建议、筹码建议和关键数值。

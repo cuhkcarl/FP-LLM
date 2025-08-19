@@ -11,3 +11,10 @@ prediction:
   availability_power: 1.0
   base_by_pos: { GK: 3.4, DEF: 3.7, MID: 4.5, FWD: 4.8 }
   spread_by_pos: { GK: 1.1, DEF: 1.2, MID: 1.4, FWD: 1.4 }
+
+chips:
+  thresholds:
+    bench_boost_min_bench_ep: 20.0          # Bench Boost 最低替补四人期望分
+    triple_captain_min_ep: 9.0              # TC 阈值（单赛程）
+    triple_captain_min_ep_if_double: 7.5    # TC 阈值（若队长所在队为双赛程）
+    free_hit_min_active_starters: 9         # 若预测能上场人数 < 该值，建议考虑 Free Hit
