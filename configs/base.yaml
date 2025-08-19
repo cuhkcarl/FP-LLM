@@ -18,3 +18,11 @@ chips:
     triple_captain_min_ep: 9.0              # TC 阈值（单赛程）
     triple_captain_min_ep_if_double: 7.5    # TC 阈值（若队长所在队为双赛程）
     free_hit_min_active_starters: 9         # 若预测能上场人数 < 该值，建议考虑 Free Hit
+
+dgw_adjust:
+  alpha_per_extra_match: 0.65
+  availability_floor: 0.50
+  availability_penalty: 0.80
+
+bench_order:
+  weight_availability: 0.5   # CLI 可覆盖

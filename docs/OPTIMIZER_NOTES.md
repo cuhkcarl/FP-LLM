@@ -65,3 +65,13 @@ python scripts/optimize_squad.py --gw 1 \
 # Report (M6)
 `scripts/generate_report.py --gw XX` 生成
 `reports/gwXX/report.md`：包含首发/阵型、C/VC、替补、转会建议、筹码建议和关键数值。
+
+# DGW 调整（M4+）
+- 如果某队在该 GW 有多于 1 场比赛，按 `EP' = EP * (1 + α * (m-1))` 放大（默认 α=0.65）。
+- 若 `availability_score < 0.5`，额外乘以 0.8 的折扣，抑制轮换/受伤风险导致的过度乐观。
+- 参数可在 `configs/base.yaml -> dgw_adjust` 调整；也可通过 CLI `--use-dgw-adjust/--no-dgw-adjust` 开关控制。
+
+# 替补排序启发式（M4+）
+- 计算 `bench_score = EP * w_ep + availability * w_avail`（默认 `w_ep=1.0`, `w_avail=0.5`）。
+- 外场优先，GK 固定最后（可通过 `BenchOrderParams.gk_last` 控制）。
+- CLI 可通过 `--bench-weight-availability` 覆盖可用性权重。
