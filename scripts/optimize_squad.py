@@ -9,7 +9,7 @@ import yaml
 
 from optimizer.chips import ChipThresholds, suggest_chips
 from optimizer.dgw import DGWParams, adjust_expected_points_for_gw
-from optimizer.finance import compute_available_funds, selling_price
+from optimizer.finance import selling_price
 from optimizer.ilp import BenchOrderParams, solve_starting_xi
 from optimizer.transfers import best_transfers, load_squad_yaml
 
@@ -73,6 +73,15 @@ def main(
         bool,
         typer.Option("--suggest-chips/--no-suggest-chips", help="是否输出筹码建议"),
     ] = True,
+    value_weight: Annotated[
+        float, typer.Option(help="净增分平手时按队值增减破除（或多目标权重）。0 表示仅用作平手破除")
+    ] = 0.0,
+    min_bank_after: Annotated[
+        float | None, typer.Option(help="转会执行后银行余额下限（可选）")
+    ] = None,
+    max_tv_drop: Annotated[
+        float | None, typer.Option(help="允许的队值最大下降（m，默认不限制）")
+    ] = None,
 ):
     """
     M4：基于预测结果与当前 15 人阵容，给出首发/队长、0/1/2 次转会建议，并（可选）输出筹码与 DGW 调整。
@@ -128,6 +137,22 @@ def main(
         bl_names, bl_price = _load_blacklist(Path("configs/base.yaml"))
         blacklist_names, blacklist_price_min = bl_names, bl_price
 
+    # ---------- 从 base.yaml 读取优化器默认参数（若存在） ----------
+    try:
+        cfg_path = Path("configs/base.yaml")
+        if cfg_path.exists():
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg: dict[str, Any] = yaml.safe_load(f) or {}
+            opt_cfg = cfg.get("optimizer") or {}
+            if value_weight == 0.0 and "value_weight" in opt_cfg:
+                value_weight = float(opt_cfg.get("value_weight", value_weight))
+            if min_bank_after is None and opt_cfg.get("min_bank_after") is not None:
+                min_bank_after = float(opt_cfg.get("min_bank_after"))
+            if max_tv_drop is None and opt_cfg.get("max_tv_drop") is not None:
+                max_tv_drop = float(opt_cfg.get("max_tv_drop"))
+    except Exception:
+        pass
+
     # ---------- 转会枚举（此时 preds 的我方成员 price_now 已是卖出价） ----------
     result = best_transfers(
         preds,
@@ -137,6 +162,11 @@ def main(
         hit_cost=hit_cost,
         blacklist_names=blacklist_names,
         blacklist_price_min=blacklist_price_min,
+        price_now_market=preds_raw.set_index("player_id")["price_now"].to_dict(),
+        purchase_prices=purchase_prices,
+        value_weight=value_weight,
+        min_bank_after=min_bank_after,
+        max_tv_drop=max_tv_drop,
     )
 
     # ---------- 输出摘要 ----------
@@ -146,6 +176,9 @@ def main(
     typer.echo(f"Captain: {name(xi['captain_id'])}")
     typer.echo(f"Vice:    {name(xi['vice_id'])}")
     typer.echo(f"Expected XI pts (incl. C): {xi['expected_points_xi_with_captain']:.2f}")
+
+    # 输出当前队值（来自 best_transfers 统一口径）
+    typer.echo(f"Current Team Value: {result['best_plan']['team_value_now']:.2f}")
 
     typer.echo("\n=== Transfers Suggestion ===")
     typer.echo(f"Baseline XI pts: {result['baseline_points']:.2f}")
@@ -157,21 +190,18 @@ def main(
         typer.echo(f"Out: {[name(i) for i in bp['out_ids']]}")
         typer.echo(f"In : {[name(i) for i in bp['in_ids']]}")
 
-        # 计算计划执行后的剩余资金（使用原始价格映射 + 买入价）
-        remain = compute_available_funds(
-            bank=float(squad.bank),
-            out_ids=bp["out_ids"],
-            in_ids=bp["in_ids"],
-            price_now=preds_raw.set_index("player_id")["price_now"].to_dict(),
-            buy_price=purchase_prices,
+        # 输出计划执行后的资金与队值（来自 best_transfers 统一口径）
+        typer.echo(f"Funds after plan (bank): {bp['bank_after']:.1f}m")
+        typer.echo(
+            f"New Team Value (after transfers): {bp['team_value_after']:.2f} (Δ {bp['team_value_delta']:+.2f})"
         )
-        typer.echo(f"Funds after plan (bank): {remain:.1f}m")
 
         typer.echo(f"New XI pts: {bp['new_points']:.2f}")
         typer.echo(f"Net gain vs baseline (after hits): {bp['net_gain']:.2f}")
 
     # ---------- 筹码建议（可选） ----------
     if suggest_chips_flag and gw is not None:
+        # 读取 chips 阈值
         thresholds = ChipThresholds()
         cfg_path = Path("configs/base.yaml")
         if cfg_path.exists():

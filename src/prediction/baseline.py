@@ -10,14 +10,14 @@ import pandas as pd
 @dataclass(frozen=True)
 class BaselineParams:
     # 位置基线（大致贴合常见每轮均分区间），可按需调
-    base_by_pos: dict[str, float] = None
-    spread_by_pos: dict[str, float] = None
+    base_by_pos: dict[str, float] | None = None
+    spread_by_pos: dict[str, float] | None = None
     min_points: float = 0.0
     max_points: float = 12.0
     min_availability: float = 0.0  # < 该值则硬降为 0（极端不出场）
     availability_power: float = 1.0  # 可调软权重（<1 放大，>1 收缩）
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.base_by_pos is None:
             object.__setattr__(self, "base_by_pos", {"GK": 3.4, "DEF": 3.7, "MID": 4.5, "FWD": 4.8})
         if self.spread_by_pos is None:
@@ -36,6 +36,8 @@ def _position_scale(df_pos: pd.DataFrame, pos: str, params: BaselineParams) -> p
     同位置内将 fdr_adjusted_recent_score 标准化为 z 分数，
     再映射到 expected_points = base + spread * z，最后裁剪到 [min,max]。
     """
+    assert params.base_by_pos is not None
+    assert params.spread_by_pos is not None
     base = params.base_by_pos.get(pos, 4.0)
     spread = params.spread_by_pos.get(pos, 1.2)
 

@@ -4,10 +4,12 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
-import yaml
+import yaml  # type: ignore[import-untyped]
 
+from optimizer.finance import compute_available_funds, selling_price
 from optimizer.ilp import solve_starting_xi
 
 
@@ -18,8 +20,8 @@ class Squad:
     free_transfers: int
 
 
-def load_squad_yaml(path: str | bytes | Path) -> Squad:
-    text = Path(path).read_text(encoding="utf-8")
+def load_squad_yaml(path: str | Path) -> Squad:
+    text = Path(str(path)).read_text(encoding="utf-8")
     data = yaml.safe_load(text) or {}
     squad_ids = [int(x) for x in data.get("squad", [])]
     bank = float(data.get("bank", 0.0))
@@ -86,6 +88,12 @@ def best_transfers(
     hit_cost: int = 4,
     blacklist_names: list[str] | None = None,
     blacklist_price_min: float | None = None,
+    # 资金/队值增强（可选）
+    price_now_market: dict[int, float] | None = None,
+    purchase_prices: dict[int, float] | None = None,
+    value_weight: float = 0.0,
+    min_bank_after: float | None = None,
+    max_tv_drop: float | None = None,
 ) -> dict:
     """
     在 0/1/2 次转会内搜索最优方案。
@@ -105,6 +113,24 @@ def best_transfers(
     team_map = pred_all.set_index("player_id")["team_id"].to_dict()
     pos_map = pred_all.set_index("player_id")["position"].to_dict()
 
+    # --- 资金/队值准备（容错） ---
+    market_price = price_now_market or price_map
+    buy_price_map = purchase_prices or {}
+
+    def _team_value(
+        ids: list[int], bank: float, buy_price_override: dict[int, float] | None = None
+    ) -> float:
+        # 按 FPL 卖出价规则计算队值：sum(selling_price(market, buy)) + bank
+        bpo = buy_price_override or buy_price_map
+        total = 0.0
+        for pid in ids:
+            cur = float(market_price.get(pid, price_map.get(pid, 0.0)))
+            buy = float(bpo.get(pid, cur))
+            total += selling_price(cur, buy)
+        return float(total + float(bank))
+
+    team_value_now = _team_value(current_ids, float(squad.bank))
+
     best = {
         "transfers": 0,
         "out_ids": [],
@@ -113,6 +139,11 @@ def best_transfers(
         "net_gain": 0.0,
         "hit_cost": 0,
         "new_squad_ids": current_ids,
+        # 资金/队值附加
+        "bank_after": float(squad.bank),
+        "team_value_now": float(team_value_now),
+        "team_value_after": float(team_value_now),
+        "team_value_delta": 0.0,
     }
 
     def _make_new_ids(out_ids: list[int], in_ids: list[int]) -> list[int] | None:
@@ -144,7 +175,7 @@ def best_transfers(
         return new_ids
 
     # 0 transfers：baseline
-    plans = [([], [])]
+    plans: list[tuple[list[int], list[int]]] = [([], [])]
 
     # 1 transfer：枚举每个 out，用同位置候选 pool 替换
     if max_transfers >= 1:
@@ -197,7 +228,46 @@ def best_transfers(
         paid_hits = max(0, transfers_cnt - squad.free_transfers)
         cost = paid_hits * hit_cost
         net_gain = new_points - baseline_points - cost
-        if net_gain > best["net_gain"] + 1e-9:
+
+        # 资金/队值：计算 bank_after 与 team_value_after
+        bank_after = compute_available_funds(
+            bank=float(squad.bank),
+            out_ids=out_ids,
+            in_ids=in_ids,
+            price_now=market_price,
+            buy_price=buy_price_map,
+        )
+
+        # 更新后的买入价字典：保留者沿用旧买入价；新买入者设置为市场价
+        buy_after: dict[int, float] = dict(buy_price_map)
+        for nid in in_ids:
+            buy_after[int(nid)] = float(market_price.get(int(nid), price_map.get(int(nid), 0.0)))
+
+        team_value_after = _team_value(new_ids, bank_after, buy_price_override=buy_after)
+        tv_delta = float(team_value_after - team_value_now)
+
+        # 约束（可选）
+        if min_bank_after is not None and bank_after < float(min_bank_after) - 1e-9:
+            continue
+        if (
+            max_tv_drop is not None
+            and (team_value_now - team_value_after) > float(max_tv_drop) + 1e-9
+        ):
+            continue
+
+        # 多目标：以净增分为主；value_weight 为 0 时，仅作平手破除
+        score_new = float(float(net_gain) + float(value_weight) * float(tv_delta))
+        score_best = float(
+            float(cast(float, best["net_gain"]))
+            + float(value_weight) * float(cast(float, best.get("team_value_delta", 0.0)))
+        )
+
+        better = score_new > score_best + 1e-9
+        if not better and abs(score_new - score_best) <= 1e-9:
+            # 平手：偏好更高的队值
+            better = float(tv_delta) > float(cast(float, best.get("team_value_delta", 0.0))) + 1e-9
+
+        if better:
             best = {
                 "transfers": transfers_cnt,
                 "out_ids": out_ids,
@@ -206,6 +276,10 @@ def best_transfers(
                 "net_gain": float(net_gain),
                 "hit_cost": cost,
                 "new_squad_ids": new_ids,
+                "bank_after": float(bank_after),
+                "team_value_now": float(team_value_now),
+                "team_value_after": float(team_value_after),
+                "team_value_delta": float(tv_delta),
             }
 
     return {
