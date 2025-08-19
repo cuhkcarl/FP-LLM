@@ -84,7 +84,7 @@ def _toy_fixtures_double_gw(gw: int) -> pd.DataFrame:
         [
             {"event": gw, "team_h": 1, "team_a": 2},
             {"event": gw, "team_h": 3, "team_a": 1},
-            {"event": gw, "team_h": 2, "team_a": 4},
+            {"event": gw, "team_h": 3, "team_a": 4},
         ]
     )
 
@@ -101,6 +101,9 @@ def test_dgw_adjust_scales_up_and_penalizes_low_availability():
     before = preds.set_index("player_id")["expected_points"]
     after = adj.set_index("player_id")["expected_points"]
 
+    print(before)
+    print(after)
+
     assert after.loc[1] > before.loc[1]  # A1
     assert after.loc[2] > before.loc[2]  # A2
 
@@ -109,8 +112,8 @@ def test_dgw_adjust_scales_up_and_penalizes_low_availability():
     assert after.loc[3] < simple_scaled
 
     # 单赛队 B1/B2 不应被放大
-    assert after.loc[11] == before.loc[11]
-    assert after.loc[12] == before.loc[12]
+    assert after.loc[11] == before.loc[11]  # 单赛队 B1
+    assert after.loc[12] == before.loc[12]  # 单赛队 B2
 
 
 def test_bench_order_prefers_outfield_and_availability():

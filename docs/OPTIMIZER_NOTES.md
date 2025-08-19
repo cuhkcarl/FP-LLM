@@ -75,3 +75,10 @@ python scripts/optimize_squad.py --gw 1 \
 - 计算 `bench_score = EP * w_ep + availability * w_avail`（默认 `w_ep=1.0`, `w_avail=0.5`）。
 - 外场优先，GK 固定最后（可通过 `BenchOrderParams.gk_last` 控制）。
 - CLI 可通过 `--bench-weight-availability` 覆盖可用性权重。
+
+
+# 资金模型（简化版）
+- 阵容 YAML 可选字段 `purchase_prices` 记录买入价（单位：百万）。
+- 卖出价规则：若 `current <= buy`，卖出价 = `current`；否则 = `buy + floor((current-buy)/0.2)*0.1`。
+- 在优化阶段，我们把“我方阵容成员”的 `price_now` 临时替换为“卖出价”，让预算与队值自然生效；不改动预测与其它逻辑。
+- 报告中会显示“计划执行后银行余额”，便于核对。

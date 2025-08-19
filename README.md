@@ -106,7 +106,14 @@ python scripts/generate_report.py --gw 1
 - `reports/gwXX/report.md`：人类可读报告
 - `reports/gwXX/summary.json`：结构化摘要（XI/C/VC/bench EP、转会、筹码、阈值）
 
-
+### 6) 资金（可选）
+在 `configs/squad.yaml` 填写买入价（仅对持有球员需要）：
+```yaml
+purchase_prices:
+  123: 7.0
+  456: 4.5
+```
+优化器会自动按 FPL 规则计算卖出价并纳入预算。
 
 ---
 
