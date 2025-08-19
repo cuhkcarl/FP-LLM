@@ -21,3 +21,9 @@ bank: 0
 
 # 免费转会数
 free_transfers: 1
+
+chips_available:
+  wildcard: true
+  free_hit: true
+  bench_boost: true
+  triple_captain: true

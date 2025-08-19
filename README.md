@@ -1,4 +1,4 @@
-# FPL Optimizer
+# FP-LLM
 
 一个以**总积分最大化**为目标的 Fantasy Premier League（FPL）工程化项目。
 当前已实现：**M0 工程脚手架** → **M1 数据层** → **M2 特征工程** → **M3 基线预测**。
@@ -82,6 +82,19 @@ python scripts/predict_points.py --gw 1
 
 # 运行优化器（首发 + 转会建议）
 python scripts/optimize_squad.py --gw 1 --squad configs/squad.yaml --pool-size 12 --max-transfers 2 --hit-cost 4
+```
+
+### 5) 优化器 + 筹码建议 + 报告
+```bash
+# 生成预测
+python scripts/predict_points.py --gw 1
+
+# 优化器（含筹码建议输出）
+python scripts/optimize_squad.py --gw 1 --squad configs/squad.yaml --pool-size 12 --max-transfers 2 --hit-cost 4
+
+# 生成 Markdown 报告
+python scripts/generate_report.py --gw 1
+# 输出：reports/gw01/report.md
 ```
 
 ---
