@@ -190,6 +190,25 @@ def main(
         except Exception:
             pass
 
+    # Rolling average (if history exists)
+    hist_path = Path("data/processed/metrics_history.parquet")
+    if hist_path.exists():
+        try:
+            import pandas as _pd
+
+            hist = _pd.read_parquet(hist_path)
+            if not hist.empty:
+                last_n = 5
+                recent = hist.tail(last_n)
+                mae_avg = float(_pd.to_numeric(recent["mae"], errors="coerce").mean())
+                ndcg_avg = float(_pd.to_numeric(recent["ndcg_at_11"], errors="coerce").mean())
+                lines.append("")
+                lines.append(
+                    f"> Recent {min(len(recent), last_n)} GWs avg — MAE: **{mae_avg:.3f}**, NDCG@11: **{ndcg_avg:.3f}**"
+                )
+        except Exception:
+            pass
+
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"gw{gw:02d}" / "report.md"
     out_path.parent.mkdir(parents=True, exist_ok=True)
