@@ -57,8 +57,19 @@ def main(
     squad = load_squad_yaml(squad_file)
     current_ids = [int(x) for x in squad.player_ids]
     current_pred = preds[preds["player_id"].isin(current_ids)].copy()
-
-    xi = solve_starting_xi(current_pred)
+    if len(current_ids) != 15:
+        xi = {
+            "starting_ids": [],
+            "bench_ids": [],
+            "captain_id": -1,
+            "vice_id": -1,
+            "formation": "-",
+            "expected_points_xi_with_captain": 0.0,
+        }
+        skip_transfers = True
+    else:
+        xi = solve_starting_xi(current_pred)
+        skip_transfers = False
 
     # transfers（尊重黑名单/高价阈值，与 CLI 行为保持一致）
     bl_names: list[str] | None = None
@@ -67,16 +78,29 @@ def main(
     if cfg_path.exists():
         n, p = _load_blacklist(cfg_path)
         bl_names, bl_price_min = n, p
-    res = best_transfers(
-        preds,
-        squad,
-        blacklist_names=bl_names,
-        blacklist_price_min=bl_price_min,
-        price_now_market=preds.set_index("player_id")["price_now"].to_dict(),
-        purchase_prices={},  # 报告不掌握买入价，回退为当前价（仅用于共同口径展示）
-        value_weight=0.0,
-    )
-    bp = res["best_plan"]
+    if skip_transfers:
+        res = {"baseline_points": 0.0}
+        bp = {
+            "transfers": 0,
+            "hit_cost": 0,
+            "out_ids": [],
+            "in_ids": [],
+            "new_points": 0.0,
+            "net_gain": 0.0,
+            "team_value_now": 0.0,
+            "team_value_after": 0.0,
+        }
+    else:
+        res = best_transfers(
+            preds,
+            squad,
+            blacklist_names=bl_names,
+            blacklist_price_min=bl_price_min,
+            price_now_market=preds.set_index("player_id")["price_now"].to_dict(),
+            purchase_prices={},  # 报告不掌握买入价，回退为当前价（仅用于共同口径展示）
+            value_weight=0.0,
+        )
+        bp = res["best_plan"]
 
     # chips
     chips_available = {}
@@ -153,20 +177,27 @@ def main(
     lines.append("")
 
     lines.append("## Transfers Suggestion")
-    lines.append(f"- Baseline XI pts: **{res['baseline_points']:.2f}**")
-    lines.append(
-        f"- Team Value (now → after): **{res['best_plan']['team_value_now']:.2f} → {res['best_plan']['team_value_after']:.2f}**"
-    )
-    if bp["transfers"] == 0:
-        lines.append("- **Best plan**: Keep (0 transfers).")
+    if skip_transfers:
+        lines.append(
+            "- 初始阵容未提供（非 15 人），跳过转会建议。请先在 configs/squad.yaml 配置 15 人阵容。"
+        )
     else:
-        lines.append(f"- **Best plan**: {bp['transfers']} transfer(s), hit cost {bp['hit_cost']}")
-        out_names = ", ".join(name(i) for i in bp["out_ids"])
-        in_names = ", ".join(name(i) for i in bp["in_ids"])
-        lines.append(f"- Out: {out_names}")
-        lines.append(f"- In : {in_names}")
-        lines.append(f"- New XI pts: **{bp['new_points']:.2f}**")
-        lines.append(f"- Net gain (after hits): **{bp['net_gain']:.2f}**")
+        lines.append(f"- Baseline XI pts: **{res['baseline_points']:.2f}**")
+        lines.append(
+            f"- Team Value (now → after): **{res['best_plan']['team_value_now']:.2f} → {res['best_plan']['team_value_after']:.2f}**"
+        )
+        if bp["transfers"] == 0:
+            lines.append("- **Best plan**: Keep (0 transfers).")
+        else:
+            lines.append(
+                f"- **Best plan**: {bp['transfers']} transfer(s), hit cost {bp['hit_cost']}"
+            )
+            out_names = ", ".join(name(i) for i in bp["out_ids"])
+            in_names = ", ".join(name(i) for i in bp["in_ids"])
+            lines.append(f"- Out: {out_names}")
+            lines.append(f"- In : {in_names}")
+            lines.append(f"- New XI pts: **{bp['new_points']:.2f}**")
+            lines.append(f"- Net gain (after hits): **{bp['net_gain']:.2f}**")
     lines.append("")
 
     lines.append("## Chips")
@@ -226,19 +257,23 @@ def main(
             "expected_points_xi_with_captain": float(xi["expected_points_xi_with_captain"]),
             "bench_ep": float(bench_ep),
         },
-        "transfers": {
-            "baseline_points": float(res["baseline_points"]),
-            "transfers": int(bp["transfers"]),
-            "out_ids": [int(x) for x in bp["out_ids"]],
-            "in_ids": [int(x) for x in bp["in_ids"]],
-            "hit_cost": int(bp["hit_cost"]),
-            "new_points": float(bp["new_points"]),
-            "net_gain": float(bp["net_gain"]),
-            "bank_after": float(bp.get("bank_after", 0.0)),
-            "team_value_now": float(bp.get("team_value_now", 0.0)),
-            "team_value_after": float(bp.get("team_value_after", 0.0)),
-            "team_value_delta": float(bp.get("team_value_delta", 0.0)),
-        },
+        "transfers": (
+            {
+                "baseline_points": float(res["baseline_points"]),
+                "transfers": int(bp["transfers"]),
+                "out_ids": [int(x) for x in bp["out_ids"]],
+                "in_ids": [int(x) for x in bp["in_ids"]],
+                "hit_cost": int(bp["hit_cost"]),
+                "new_points": float(bp["new_points"]),
+                "net_gain": float(bp["net_gain"]),
+                "bank_after": float(bp.get("bank_after", 0.0)),
+                "team_value_now": float(bp.get("team_value_now", 0.0)),
+                "team_value_after": float(bp.get("team_value_after", 0.0)),
+                "team_value_delta": float(bp.get("team_value_delta", 0.0)),
+            }
+            if not skip_transfers
+            else {"skipped": True, "reason": "initial squad missing (need 15)"}
+        ),
         "chips": chips,
         "thresholds": {
             "bench_boost_min_bench_ep": float(thresholds.bench_boost_min_bench_ep),
