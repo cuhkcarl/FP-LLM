@@ -5,6 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch: {}
 
 jobs:
   ci:
@@ -17,7 +18,7 @@ jobs:
       - name: Install uv
         run: pip install -U uv
       - name: Install project (with dev deps)
-        run: uv pip install -e ".[dev]"
+        run: uv pip install --system -e ".[dev]"
       - name: Lint (ruff)
         run: ruff check .
       - name: Format check (black)

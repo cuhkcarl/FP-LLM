@@ -174,6 +174,22 @@ def main(
         status = "YES ✅" if v["recommended"] else "no"
         lines.append(f"- **{k}**: {status} — {v['reason']}  `{v['metrics']}`")
 
+    # Model performance snapshot (if metrics.json exists)
+    metrics_path = out_dir / f"gw{gw:02d}" / "metrics.json"
+    if metrics_path.exists():
+        try:
+            import json as _json
+
+            m = _json.loads(metrics_path.read_text(encoding="utf-8"))
+            ov = m.get("overall", {})
+            lines.append("")
+            lines.append("## Model Performance")
+            lines.append(
+                f"- Overall: MAE **{ov.get('mae', 0):.3f}**, RMSE **{ov.get('rmse', 0):.3f}**, NDCG@11 **{ov.get('ndcg_at_11', 0):.3f}**"
+            )
+        except Exception:
+            pass
+
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"gw{gw:02d}" / "report.md"
     out_path.parent.mkdir(parents=True, exist_ok=True)
