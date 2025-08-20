@@ -1,20 +1,5 @@
 # 当前阵容（15 名球员的 player_id）
-squad:
-  - 253   # GK
-  - 502   # GK
-  - 402   # DEF
-  - 370
-  - 5
-  - 225
-  - 672
-  - 119 # MID
-  - 417
-  - 82
-  - 450
-  - 413
-  - 661 # FWD
-  - 681
-  - 283
+squad: []
 
 # 银行（单位：£m）
 bank: 0
@@ -28,6 +13,4 @@ chips_available:
   bench_boost: true
   triple_captain: true
 
-purchase_prices:
-  123: 7.0
-  456: 4.5
+purchase_prices: {}

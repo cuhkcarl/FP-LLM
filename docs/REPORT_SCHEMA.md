@@ -10,6 +10,7 @@
 - `thresholds` (object)：筹码阈值快照。
 - `blacklist` (object)：黑名单快照。
 - `optimizer` (object)：优化器参数（用于复现实验）。
+ - （可选）`skipped_reasons` (object)：跳过某步骤的原因（例如未提供 15 人阵容）。
 
 ## xi
 - `starting_ids` (int[])：首发 11 人 `player_id`。
