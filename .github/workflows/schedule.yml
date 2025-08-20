@@ -74,13 +74,14 @@ jobs:
           mypy src
           pytest -q
 
-      - name: Commit and PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BR=auto/gw${{ steps.gw.outputs.gw }}-report
-          git checkout -b "$BR"
-          git add -A
-          git -c user.name='github-actions' -c user.email='actions@users.noreply.github.com' commit -m "chore(reports): weekly GW ${{ steps.gw.outputs.gw }} report artifacts"
-          git push -u origin "$BR"
-          echo "Create PR from $BR to default branch via web UI"
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: |
+            chore(reports): weekly GW ${{ steps.gw.outputs.gw }} report artifacts
+          branch: auto/gw${{ steps.gw.outputs.gw }}-report
+          title: Weekly GW ${{ steps.gw.outputs.gw }} Report
+          body: |
+            - Generated report.md and summary.json (and metrics.json if available)
+            - GW: ${{ steps.gw.outputs.gw }}
+          labels: automated, report
