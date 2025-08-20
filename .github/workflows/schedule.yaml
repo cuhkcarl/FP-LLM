@@ -1,10 +1,10 @@
-name: Weekly predictions
+name: Weekly GW Pipeline
 
 on:
   schedule:
-    - cron: "0 3 * * 4"  # Thu 11:00 SHA
-    - cron: "0 3 * * 5"  # Fri 11:00 SHA
-  workflow_dispatch:
+    - cron: "0 3 * * 4"  # Thu 11:00 (UTC+8 -> 11:00)
+    - cron: "0 3 * * 5"  # Fri 11:00 (UTC+8 -> 11:00)
+  workflow_dispatch: {}
 
 jobs:
   weekly:
@@ -16,16 +16,68 @@ jobs:
           python-version: "3.11"
       - name: Install uv
         run: pip install -U uv
-      - name: Install deps
-        run: uv pip install -e ".[dev]" -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple
+      - name: Install deps (with mirror)
+        run: uv pip install --system -e ".[dev]" -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple
+
+      - name: Read current GW
+        id: gw
+        shell: bash
+        run: |
+          GW=$(python - <<'PY'
+          import yaml
+          from pathlib import Path
+          cfg = yaml.safe_load(Path('configs/base.yaml').read_text(encoding='utf-8')) or {}
+          print(int(cfg.get('current_gw', 1)))
+          PY
+          )
+          echo "gw=$GW" >> "$GITHUB_OUTPUT"
+
       - name: Build features & predictions
         run: |
-          uv run python scripts/build_features.py --gw 1 --k 3
-          uv run python scripts/predict_points.py --gw 1
+          GW=${{ steps.gw.outputs.gw }}
+          uv run python scripts/build_features.py --gw "$GW" --k 3
+          uv run python scripts/predict_points.py --gw "$GW"
+
+      - name: Optimize
+        run: |
+          GW=${{ steps.gw.outputs.gw }}
+          uv run python scripts/optimize_squad.py --gw "$GW" --respect-blacklist --use-dgw-adjust
+
+      - name: Fetch actuals (may be unavailable)
+        continue-on-error: true
+        run: |
+          GW=${{ steps.gw.outputs.gw }}
+          uv run python scripts/fetch_actuals.py --gw "$GW"
+
+      - name: Evaluate (if actuals exists)
+        shell: bash
+        run: |
+          GW=${{ steps.gw.outputs.gw }}
+          FILE="data/processed/actuals_gw$(printf '%02d' "$GW").parquet"
+          if [ -f "$FILE" ]; then
+            uv run python scripts/evaluate_gw.py --gw "$GW"
+          else
+            echo "actuals not ready; skip evaluate"
+          fi
+
+      - name: Generate report
+        run: |
+          GW=${{ steps.gw.outputs.gw }}
+          uv run python scripts/generate_report.py --gw "$GW"
+
+      - name: Quality gates
+        run: |
+          ruff check .
+          mypy src
+          pytest -q
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
-          branch: weekly/predictions
-          title: "Weekly: features & predictions"
-          commit-message: "chore(data): weekly features & predictions"
-          body: "Auto-generated features & predictions."
+          branch: auto/gw${{ steps.gw.outputs.gw }}-report
+          title: "Weekly GW ${{ steps.gw.outputs.gw }} Report"
+          commit-message: "chore(reports): weekly GW ${{ steps.gw.outputs.gw }} artifacts"
+          body: |
+            - Generated report.md and summary.json (and metrics.json if available)
+            - GW: ${{ steps.gw.outputs.gw }}
+          labels: automated, report
