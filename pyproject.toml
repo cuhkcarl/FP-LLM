@@ -68,6 +68,17 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
+skip_glob = [
+    "**/.fpllm/**",
+    "**/.venv/**",
+    "venv/**",
+    "build/**",
+    "dist/**",
+    "**/.git/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/.ruff_cache/**",
+]
 
 [tool.mypy]
 python_version = "3.11"
