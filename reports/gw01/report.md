@@ -23,15 +23,16 @@
 ## Bench
 | Player | Pos | Team | EP |
 |---|---|---|---:|
+| Mbeumo | MID | MUN | 2.89 |
 | James | DEF | CHE | 2.45 |
 | Gabriel | DEF | ARS | 2.45 |
-| Mbeumo | MID | MUN | 2.89 |
 | Sels | GK | NFO | 2.29 |
 
 > Bench EP total: **10.07**
 
 ## Transfers Suggestion
 - Baseline XI pts: **57.97**
+- Team Value (now → after): **100.00 → 100.00**
 - **Best plan**: 2 transfer(s), hit cost 4
 - Out: Gabriel, Mbeumo
 - In : Ballard, O'Riley
@@ -43,3 +44,6 @@
 - **triple_captain**: YES ✅ — captain EP 9.0 ≥ 9.0  `{'captain_ep': 9.0, 'captain_double': False}`
 - **free_hit**: no — enough active starters  `{'active_likely_starters': 15}`
 - **wildcard**: no — not auto-triggered (needs structural check)  `{}`
+
+## Model Performance
+- Overall: MAE **2.097**, RMSE **2.433**, NDCG@11 **0.739**

@@ -101,6 +101,17 @@ def main(
     squad = load_squad_yaml(squad_file)
     current_ids = [int(x) for x in squad.player_ids]
 
+    # ---------- 冷启动保护：若不是 15 人阵容，跳过转会与首发 ----------
+    if len(current_ids) != 15:
+        typer.echo("\n=== Initial Squad Missing ===")
+        typer.echo(
+            f"Provided squad has {len(current_ids)} players (need 15). Skipping XI and transfer search."
+        )
+        typer.echo(
+            "Please configure configs/squad.yaml with 15 player_ids for normal optimization."
+        )
+        return
+
     # 从 YAML 取 purchase_prices（可选）
     purchase_prices: dict[int, float] = {}
     try:

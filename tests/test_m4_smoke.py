@@ -117,3 +117,21 @@ def test_generate_report_produces_markdown_with_final_newline(tmp_path: Path, mo
     with open(out_path, "rb") as f:
         content = f.read()
     assert content.endswith(b"\n")
+
+
+def test_generate_report_skips_transfers_if_squad_incomplete(tmp_path: Path):
+    # 准备最简环境
+    data_dir = tmp_path / "data"
+    (data_dir / "processed").mkdir(parents=True, exist_ok=True)
+    preds = _toy_predictions()
+    preds.to_parquet(data_dir / "processed" / "predictions_gw01.parquet", index=False)
+    # squad 为空
+    squad_yaml = tmp_path / "squad.yaml"
+    yaml.safe_dump(
+        {"squad": [], "bank": 0.0, "free_transfers": 1}, open(squad_yaml, "w", encoding="utf-8")
+    )
+    out_dir = tmp_path / "reports"
+    # 生成报告
+    gen_report_main(gw=1, data_dir=data_dir, squad_file=squad_yaml, out_dir=out_dir)
+    text = (out_dir / "gw01" / "report.md").read_text(encoding="utf-8")
+    assert "跳过转会建议" in text
