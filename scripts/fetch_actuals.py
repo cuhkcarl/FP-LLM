@@ -6,7 +6,7 @@ from typing import Annotated
 import pandas as pd
 import typer
 
-from fpl_data.clients import EVENT_LIVE, fetch_json
+from fpl_data.clients import EVENT_LIVE, get_json
 
 app = typer.Typer(add_completion=False)
 
@@ -27,7 +27,7 @@ def main(
     抓取 `event/{gw}/live/`，抽取逐球员真实分，写入 `actuals_gwXX.parquet`。
     """
     url = EVENT_LIVE(gw)
-    data = fetch_json(url, force_refresh=force_refresh)
+    data = get_json(url, force_refresh=force_refresh)
     # 结构：{"elements": [{"id": pid, "stats": {"total_points": .., "minutes": .., ...}}, ...]}
     elements = data.get("elements") or []
     rows = []

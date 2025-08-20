@@ -109,6 +109,8 @@ python scripts/generate_report.py --gw 1
 - `reports/gwXX/report.md`：人类可读报告
 - `reports/gwXX/summary.json`：结构化摘要（XI/C/VC/bench EP、转会、资金/队值、筹码、阈值、优化器参数）
 
+更多 CLI 使用示例与组合，见 `docs/CLI.md`。
+
 ### 6) 资金（可选）
 在 `configs/squad.yaml` 填写买入价（仅对持有球员需要）：
 ```yaml

@@ -1,0 +1,94 @@
+{
+  "gw": 1,
+  "xi": {
+    "starting_ids": [
+      82,
+      661,
+      402,
+      417,
+      413,
+      283,
+      681,
+      450,
+      370,
+      672,
+      253
+    ],
+    "bench_ids": [
+      119,
+      225,
+      5,
+      502
+    ],
+    "captain_id": 82,
+    "vice_id": 661,
+    "expected_points_xi_with_captain": 57.966834386601754,
+    "bench_ep": 10.070758432258405
+  },
+  "transfers": {
+    "baseline_points": 57.966834386601754,
+    "transfers": 2,
+    "out_ids": [
+      5,
+      119
+    ],
+    "in_ids": [
+      531,
+      164
+    ],
+    "hit_cost": 4,
+    "new_points": 69.87165972345798,
+    "net_gain": 7.904825336856227,
+    "bank_after": 4.0,
+    "team_value_now": 100.0,
+    "team_value_after": 100.0,
+    "team_value_delta": 0.0
+  },
+  "chips": {
+    "bench_boost": {
+      "recommended": false,
+      "reason": "bench EP below threshold",
+      "metrics": {
+        "bench_ep": 10.070758432258405
+      }
+    },
+    "triple_captain": {
+      "recommended": true,
+      "reason": "captain EP 9.0 ≥ 9.0",
+      "metrics": {
+        "captain_ep": 9.0,
+        "captain_double": false
+      }
+    },
+    "free_hit": {
+      "recommended": false,
+      "reason": "enough active starters",
+      "metrics": {
+        "active_likely_starters": 15
+      }
+    },
+    "wildcard": {
+      "recommended": false,
+      "reason": "not auto-triggered (needs structural check)",
+      "metrics": {}
+    }
+  },
+  "thresholds": {
+    "bench_boost_min_bench_ep": 20.0,
+    "triple_captain_min_ep": 9.0,
+    "triple_captain_min_ep_if_double": 7.5,
+    "free_hit_min_active_starters": 9
+  },
+  "blacklist": {
+    "names": [
+      "Mohamed Salah",
+      "Erling Haaland"
+    ],
+    "price_min": 13.0
+  },
+  "optimizer": {
+    "value_weight": 0.0,
+    "min_bank_after": null,
+    "max_tv_drop": null
+  }
+}
