@@ -111,6 +111,19 @@ python scripts/generate_report.py --gw 1
 
 更多 CLI 使用示例与组合，见 `docs/CLI.md`。
 
+### 冷启动（首轮/空阵容）
+- 一键入口（推荐）：
+```bash
+python scripts/run_cold_start.py --gw 2 --mode blend
+# 或纯冷启动：
+python scripts/run_cold_start.py --gw 2 --mode cold_start
+```
+- 组成步骤（可单独运行）：
+  - `scripts/fetch_last_season.py`：抓取上季 totals（幂等，已存在则跳过）
+  - `scripts/predict_points.py --mode cold_start|blend`：使用上季 per90 + 可用性构造 EP（或与 baseline 融合）
+  - `scripts/build_squad.py`：在预算/配额/每队≤3 下构建 15 人初始阵容
+- 报告在阵容非 15 人时会自动给出“Initial Squad Suggestion”，并跳过“Transfers Suggestion”
+
 ### 6) 资金（可选）
 在 `configs/squad.yaml` 填写买入价（仅对持有球员需要）：
 ```yaml

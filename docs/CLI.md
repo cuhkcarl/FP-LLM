@@ -33,6 +33,15 @@ python scripts/predict_points.py --gw 1 \
 # 产物：data/processed/predictions_gw01.parquet
 ```
 
+冷启动/融合模式：
+```bash
+# 冷启动（仅用上季信息推 EP；需先抓 last_season_totals）
+python scripts/predict_points.py --gw 1 --mode cold_start
+
+# 融合（GW1 权重偏向冷启动，随后 3 轮线性衰减）
+python scripts/predict_points.py --gw 1 --mode blend --blend-decay-gws 3
+```
+
 ## 4) 优化器与筹码（M4/M5）
 - 准备阵容文件：`configs/squad.yaml`（示例见 `configs/squad.sample.yaml`）
 ```bash
@@ -78,15 +87,31 @@ python scripts/backfill_metrics.py --start-gw 1 --end-gw 5
 # 产物：reports/gwXX/metrics.json 与 data/processed/metrics_history.parquet
 ```
 
+## 7.5) 冷启动补充
+- 抓取上季 totals（首次较慢，走 HTTP 缓存）
+```bash
+python scripts/fetch_last_season.py
+```
+- 冷启动阵容构建（给定预测 parquet）
+```bash
+python scripts/build_squad.py --preds-path data/processed/predictions_gw01.parquet --budget 100.0
+```
+
 ## 8) 常用组合
-- 单轮全流程（不含实时拉取 raw 数据）：
+- 冷启动一键入口（推荐）：
+```bash
+python scripts/run_cold_start.py --gw 2 --mode blend
+# 或：
+python scripts/run_cold_start.py --gw 2 --mode cold_start
+```
+- 单轮手动组合（不含实时抓 raw）：
 ```bash
 GW=1
 python scripts/build_features.py --gw $GW --k 3
 python scripts/predict_points.py --gw $GW
 python scripts/optimize_squad.py --gw $GW --squad configs/squad.yaml --respect-blacklist --use-dgw-adjust
-python scripts/fetch_actuals.py --gw $GW || true   # 若当轮未完会失败，可忽略
-python scripts/evaluate_gw.py --gw $GW || true    # 仅在有 actuals 时成功
+python scripts/fetch_actuals.py --gw $GW || true
+python scripts/evaluate_gw.py --gw $GW || true
 python scripts/generate_report.py --gw $GW
 ```
 

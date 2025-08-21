@@ -61,12 +61,17 @@ def _select_candidates(
     pool_size: int,
     blacklist_names: list[str] | None = None,
     blacklist_price_min: float | None = None,
+    whitelist_names: list[str] | None = None,
 ) -> pd.DataFrame:
     df = pred_all[pred_all["position"] == position].copy()
+    whitelist_names_set = set(whitelist_names or [])
     if blacklist_names:
-        df = df[~df["web_name"].isin(blacklist_names)]
+        df = df[~(df["web_name"].isin(blacklist_names) & ~df["web_name"].isin(whitelist_names_set))]
     if blacklist_price_min is not None:
-        df = df[df["price_now"] < float(blacklist_price_min)]
+        df = df[
+            (df["price_now"] < float(blacklist_price_min))
+            | df["web_name"].isin(whitelist_names_set)
+        ]
     df = df[~df["player_id"].isin(exclude_ids)]
     df = df.sort_values("expected_points", ascending=False).head(pool_size)
     return df
@@ -88,6 +93,7 @@ def best_transfers(
     hit_cost: int = 4,
     blacklist_names: list[str] | None = None,
     blacklist_price_min: float | None = None,
+    whitelist_names: list[str] | None = None,
     # 资金/队值增强（可选）
     price_now_market: dict[int, float] | None = None,
     purchase_prices: dict[int, float] | None = None,
@@ -188,6 +194,7 @@ def best_transfers(
                 pool_size=pool_size,
                 blacklist_names=blacklist_names,
                 blacklist_price_min=blacklist_price_min,
+                whitelist_names=whitelist_names,
             )
             for n in cands["player_id"].tolist():
                 plans.append(([o], [n]))
@@ -203,6 +210,7 @@ def best_transfers(
                 pool_size=pool_size,
                 blacklist_names=blacklist_names,
                 blacklist_price_min=blacklist_price_min,
+                whitelist_names=whitelist_names,
             )["player_id"].tolist()
             pool2 = _select_candidates(
                 pred_all,
@@ -211,6 +219,7 @@ def best_transfers(
                 pool_size=pool_size,
                 blacklist_names=blacklist_names,
                 blacklist_price_min=blacklist_price_min,
+                whitelist_names=whitelist_names,
             )["player_id"].tolist()
             for n1 in pool1:
                 for n2 in pool2:
