@@ -134,4 +134,5 @@ def test_generate_report_skips_transfers_if_squad_incomplete(tmp_path: Path):
     # 生成报告
     gen_report_main(gw=1, data_dir=data_dir, squad_file=squad_yaml, out_dir=out_dir)
     text = (out_dir / "gw01" / "report.md").read_text(encoding="utf-8")
-    assert "跳过转会建议" in text
+    # 冷启动模式下应展示 Initial Squad Suggestion
+    assert "Initial Squad Suggestion" in text

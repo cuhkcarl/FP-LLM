@@ -10,7 +10,8 @@
 - `thresholds` (object)：筹码阈值快照。
 - `blacklist` (object)：黑名单快照。
 - `optimizer` (object)：优化器参数（用于复现实验）。
- - （可选）`skipped_reasons` (object)：跳过某步骤的原因（例如未提供 15 人阵容）。
+- （可选）`skipped_reasons` (object)：跳过某步骤的原因（例如未提供 15 人阵容）。
+- （可选）`initial_squad` (object | null)：当阵容非 15 人时的冷启动建队结果。
 
 ## xi
 - `starting_ids` (int[])：首发 11 人 `player_id`。
@@ -53,6 +54,12 @@
 - `value_weight` (float)：队值在目标函数中的权重（0 表示仅用作平手破除）。
 - `min_bank_after` (float | null)：执行后银行下限。
 - `max_tv_drop` (float | null)：允许的队值最大下降。
+
+## initial_squad（可选）
+- `player_ids` (int[])：构建的 15 人阵容 id 列表。
+- `cost` (float)：总成本。
+- `bank` (float)：剩余银行。
+- `xi` (object)：基于该 15 人阵容的首发/替补/队长建议。
 
 ## 备注
 - 队值口径：`sum(selling_price(current_price, buy_price)) + bank`；新买入球员的 `buy_price` 视为当前市场价。

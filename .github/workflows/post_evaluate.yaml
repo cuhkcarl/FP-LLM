@@ -1,0 +1,99 @@
+name: Post-match Evaluate and Report
+
+on:
+  schedule:
+    # 每天凌晨 4:00 UTC 跑一次（UTC+8 -> 中午 12:00），用于“轮询式”检测是否完赛
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  post_evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install uv
+        run: pip install -U uv
+      - name: Install deps (with mirror)
+        run: uv pip install --system -e ".[dev]" -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple
+
+      - name: Detect GWs (current/previous) from bootstrap-static
+        id: gw
+        shell: bash
+        run: |
+          CURRENT=$(uv run python scripts/detect_gw.py --mode current | cat)
+          PREV=$(uv run python scripts/detect_gw.py --mode previous | cat)
+          echo "current_gw=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "previous_gw=$PREV" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch FPL raw (bootstrap-static, fixtures)
+        run: |
+          uv run python scripts/fetch_fpl.py --out-dir data/raw/fpl --force-refresh
+
+      - name: Check if previous GW finished (via fixtures)
+        id: chk
+        shell: bash
+        run: |
+          PREV=${{ steps.gw.outputs.previous_gw }}
+          uv run python scripts/check_gw_finished.py --gw "$PREV" --github-output "$GITHUB_OUTPUT"
+
+      - name: Exit if not finished
+        if: steps.chk.outputs.all_finished != 'true'
+        run: echo "Previous GW not finished; skipping." && exit 0
+
+      - name: Exit if metrics already exists (idempotent guard)
+        id: guard
+        shell: bash
+        run: |
+          GW=${{ steps.gw.outputs.previous_gw }}
+          FILE="reports/gw$(printf '%02d' "$GW")/metrics.json"
+          if [ -f "$FILE" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Short-circuit when metrics exist
+        if: steps.guard.outputs.exists == 'true'
+        run: echo "Metrics already exist; nothing to do." && exit 0
+
+      - name: Build features & predictions (idempotent)
+        run: |
+          GW=${{ steps.gw.outputs.previous_gw }}
+          uv run python scripts/build_features.py --gw "$GW" --k 3 || true
+          uv run python scripts/predict_points.py --gw "$GW"
+
+      - name: Fetch actuals
+        run: |
+          GW=${{ steps.gw.outputs.previous_gw }}
+          uv run python scripts/fetch_actuals.py --gw "$GW"
+
+      - name: Evaluate
+        run: |
+          GW=${{ steps.gw.outputs.previous_gw }}
+          uv run python scripts/evaluate_gw.py --gw "$GW"
+
+      - name: Generate report (previous GW)
+        run: |
+          GW=${{ steps.gw.outputs.previous_gw }}
+          uv run python scripts/generate_report.py --gw "$GW" --metrics-only
+
+      - name: Quality gates (non-blocking)
+        continue-on-error: true
+        run: |
+          ruff check . || true
+          mypy src || true
+          pytest -q || true
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: auto/post-gw${{ steps.gw.outputs.previous_gw }}-evaluate
+          title: "Post-match GW ${{ steps.gw.outputs.previous_gw }} Evaluate & Report"
+          commit-message: "chore(reports): post-match evaluate and update report for GW ${{ steps.gw.outputs.previous_gw }}"
+          body: |
+            - Detected completion for GW ${{ steps.gw.outputs.previous_gw }} via fixtures
+            - Fetched actuals, evaluated metrics, and regenerated report
+          labels: automated, report

@@ -1,0 +1,127 @@
+{
+  "gw": 2,
+  "xi": {
+    "starting_ids": [
+      82,
+      525,
+      47,
+      119,
+      624,
+      241,
+      582,
+      1,
+      476,
+      402,
+      258
+    ],
+    "bench_ids": [
+      64,
+      6,
+      257,
+      253
+    ],
+    "captain_id": 82,
+    "vice_id": 525,
+    "expected_points_xi_with_captain": 54.09530171104614,
+    "bench_ep": 15.272230516669513
+  },
+  "transfers": {
+    "skipped": true,
+    "reason": "initial squad missing (need 15)"
+  },
+  "initial_squad": {
+    "player_ids": [
+      82,
+      582,
+      525,
+      47,
+      1,
+      241,
+      6,
+      402,
+      476,
+      258,
+      257,
+      253,
+      64,
+      624,
+      119
+    ],
+    "cost": 96.2,
+    "bank": 3.799999999999997,
+    "xi": {
+      "starting_ids": [
+        82,
+        525,
+        47,
+        119,
+        624,
+        241,
+        582,
+        1,
+        476,
+        402,
+        258
+      ],
+      "bench_ids": [
+        64,
+        6,
+        257,
+        253
+      ],
+      "captain_id": 82,
+      "vice_id": 525,
+      "formation": "1-3-5-2"
+    }
+  },
+  "chips": {
+    "bench_boost": {
+      "recommended": false,
+      "reason": "bench EP below threshold",
+      "metrics": {
+        "bench_ep": 15.272230516669513
+      }
+    },
+    "triple_captain": {
+      "recommended": false,
+      "reason": "captain EP below threshold",
+      "metrics": {
+        "captain_ep": 5.4298332815472685,
+        "captain_double": false
+      }
+    },
+    "free_hit": {
+      "recommended": false,
+      "reason": "enough active starters",
+      "metrics": {
+        "active_likely_starters": 15
+      }
+    },
+    "wildcard": {
+      "recommended": false,
+      "reason": "not auto-triggered (needs structural check)",
+      "metrics": {}
+    }
+  },
+  "thresholds": {
+    "bench_boost_min_bench_ep": 20.0,
+    "triple_captain_min_ep": 9.0,
+    "triple_captain_min_ep_if_double": 7.5,
+    "free_hit_min_active_starters": 9
+  },
+  "blacklist": {
+    "names": [
+      "Mohamed Salah",
+      "Erling Haaland"
+    ],
+    "price_min": 13.0
+  },
+  "whitelist": {
+    "names": null
+  },
+  "optimizer": {
+    "value_weight": 0.0,
+    "min_bank_after": null,
+    "max_tv_drop": null
+  }
+}

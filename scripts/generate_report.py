@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -10,6 +11,7 @@ import yaml
 
 from optimizer.chips import ChipThresholds, suggest_chips
 from optimizer.ilp import solve_starting_xi
+from optimizer.squad_builder import BuildParams, build_initial_squad
 from optimizer.transfers import best_transfers, load_squad_yaml
 
 app = typer.Typer(add_completion=False)
@@ -43,13 +45,64 @@ def _load_blacklist(cfg_path: Path) -> tuple[list[str] | None, float | None]:
         return None, None
 
 
+def _render_model_performance_section(metrics_path: Path) -> list[str]:
+    try:
+        import json as _json
+
+        m = _json.loads(metrics_path.read_text(encoding="utf-8"))
+        ov = m.get("overall", {})
+        lines = []
+        lines.append("")
+        lines.append("## Model Performance")
+        lines.append(
+            f"- Overall: MAE **{ov.get('mae', 0):.3f}**, RMSE **{ov.get('rmse', 0):.3f}**, NDCG@11 **{ov.get('ndcg_at_11', 0):.3f}**"
+        )
+        return lines
+    except Exception:
+        return []
+
+
+def _update_report_metrics_only(report_path: Path, metrics_path: Path) -> None:
+    if not metrics_path.exists():
+        typer.echo(f"[warn] metrics not found: {metrics_path}; skip metrics-only update")
+        return
+    new_block = _render_model_performance_section(metrics_path)
+    if not new_block:
+        typer.echo("[warn] failed to render metrics block; skip")
+        return
+    if report_path.exists():
+        content = report_path.read_text(encoding="utf-8")
+    else:
+        content = ""
+    # 查找并替换已有的 Model Performance 段落（从标题到下一个二级标题或 EOF）
+    pattern = re.compile(r"\n## Model Performance[\s\S]*?(?=\n##\s|\Z)")
+    block_text = "\n" + "\n".join(new_block)
+    if re.search(pattern, content):
+        updated = re.sub(pattern, block_text, content)
+    else:
+        updated = content.rstrip() + block_text + "\n"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(updated, encoding="utf-8")
+    typer.echo(f"✅ metrics section updated -> {report_path}")
+
+
 @app.command()
 def main(
     gw: Annotated[int, typer.Option(help="生成报告的 GW")],
     data_dir: Annotated[Path, typer.Option(help="数据目录")] = Path("data"),
     squad_file: Annotated[Path, typer.Option(help="阵容 YAML")] = Path("configs/squad.yaml"),
     out_dir: Annotated[Path, typer.Option(help="报告输出目录")] = Path("reports"),
+    metrics_only: Annotated[
+        bool,
+        typer.Option("--metrics-only/--no-metrics-only", help="仅更新/写入 Model Performance 段落"),
+    ] = False,
 ):
+    # 指标-only 模式：不重生成其它内容，只更新报告中的指标段
+    if metrics_only:
+        metrics_path = out_dir / f"gw{gw:02d}" / "metrics.json"
+        report_path = out_dir / f"gw{gw:02d}" / "report.md"
+        _update_report_metrics_only(report_path, metrics_path)
+        return
     preds = pd.read_parquet(data_dir / "processed" / f"predictions_gw{gw:02d}.parquet")
     fixtures_path = data_dir / "interim" / "fixtures_clean.parquet"
     fixtures = pd.read_parquet(fixtures_path) if fixtures_path.exists() else None
@@ -67,6 +120,46 @@ def main(
             "expected_points_xi_with_captain": 0.0,
         }
         skip_transfers = True
+        # 尝试构建初始阵容建议（冷启动）
+        init_budget = 100.0
+        try:
+            cfg_path = Path("configs/base.yaml")
+            if cfg_path.exists():
+                with open(cfg_path, encoding="utf-8") as f:
+                    cfg: dict[str, Any] = yaml.safe_load(f) or {}
+                sb = (cfg.get("optimizer") or {}).get("squad_builder") or {}
+                if sb.get("budget") is not None:
+                    init_budget = float(sb.get("budget"))
+        except Exception:
+            pass
+        # 黑/白名单（对初始阵容建议同样生效）
+        bl_names: list[str] | None = None
+        bl_price_min: float | None = None
+        wl_names: list[str] | None = None
+        cfg_path = Path("configs/base.yaml")
+        if cfg_path.exists():
+            n, p = _load_blacklist(cfg_path)
+            bl_names, bl_price_min = n, p
+            try:
+                with open(cfg_path, encoding="utf-8") as f:
+                    cfg_wh = yaml.safe_load(f) or {}
+                wl = (cfg_wh.get("whitelist") or {}).get("names")
+                if isinstance(wl, list) and len(wl) > 0:
+                    wl_names = [str(x) for x in wl]
+            except Exception:
+                wl_names = None
+        init_res = build_initial_squad(
+            preds,
+            params=BuildParams(budget=init_budget),
+            blacklist_names=bl_names,
+            blacklist_price_min=bl_price_min,
+            whitelist_names=wl_names,
+        )
+        init_ids = init_res["player_ids"]
+        init_pred = preds[preds["player_id"].isin(init_ids)].copy()
+        xi_initial = solve_starting_xi(init_pred)
+        # 顶部展示直接采用初始阵容的 XI/Bench，避免空表
+        xi = xi_initial
     else:
         xi = solve_starting_xi(current_pred)
         skip_transfers = False
@@ -75,9 +168,18 @@ def main(
     bl_names: list[str] | None = None
     bl_price_min: float | None = None
     cfg_path = Path("configs/base.yaml")
+    wl_names_for_transfer: list[str] | None = None
     if cfg_path.exists():
         n, p = _load_blacklist(cfg_path)
         bl_names, bl_price_min = n, p
+        try:
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg_wh = yaml.safe_load(f) or {}
+            wl = (cfg_wh.get("whitelist") or {}).get("names")
+            if isinstance(wl, list) and len(wl) > 0:
+                wl_names_for_transfer = [str(x) for x in wl]
+        except Exception:
+            wl_names_for_transfer = None
     if skip_transfers:
         res = {"baseline_points": 0.0}
         bp = {
@@ -96,6 +198,7 @@ def main(
             squad,
             blacklist_names=bl_names,
             blacklist_price_min=bl_price_min,
+            whitelist_names=wl_names_for_transfer,
             price_now_market=preds.set_index("player_id")["price_now"].to_dict(),
             purchase_prices={},  # 报告不掌握买入价，回退为当前价（仅用于共同口径展示）
             value_weight=0.0,
@@ -176,12 +279,49 @@ def main(
     lines.append(f"\n> Bench EP total: **{bench_ep:.2f}**")
     lines.append("")
 
-    lines.append("## Transfers Suggestion")
     if skip_transfers:
+        lines.append("## Initial Squad Suggestion")
         lines.append(
-            "- 初始阵容未提供（非 15 人），跳过转会建议。请先在 configs/squad.yaml 配置 15 人阵容。"
+            f"- Budget: **{init_budget:.1f}** — Cost: **{init_res['cost']:.1f}**, Bank: **{init_res['bank']:.1f}**"
         )
+        # 黑/白名单快照（便于可解释）
+        try:
+            _cfg = {}
+            if Path("configs/base.yaml").exists():
+                with open(Path("configs/base.yaml"), encoding="utf-8") as f:
+                    _cfg = yaml.safe_load(f) or {}
+            bls = (_cfg.get("blacklist") or {}).get("names")
+            blp = (_cfg.get("blacklist") or {}).get("price_min")
+            wls = (_cfg.get("whitelist") or {}).get("names")
+            lines.append(f"- Blacklist: names={bls} price_min={blp}")
+            lines.append(f"- Whitelist: names={wls}")
+        except Exception:
+            pass
+        lines.append("")
+        lines.append(f"- Formation: **{xi_initial['formation']}**")
+        lines.append("| Player | Pos | Team | EP |")
+        lines.append("|---|---|---|---:|")
+        for pid in xi_initial["starting_ids"]:
+            lines.append(f"| {name(pid)} | {pos_of(pid)} | {team_of(pid)} | {ep_of(pid):.2f} |")
+        bench_ep_init = (
+            sum(ep_of(pid) for pid in xi_initial.get("bench_ids", []))
+            if xi_initial.get("bench_ids")
+            else 0.0
+        )
+        lines.append(f"\n> Bench EP total: **{bench_ep_init:.2f}**")
+        lines.append("")
+        # 输出初始建议的替补表格
+        if xi_initial.get("bench_ids"):
+            lines.append("### Bench (Initial Suggestion)")
+            lines.append("| Player | Pos | Team | EP |")
+            lines.append("|---|---|---|---:|")
+            for pid in xi_initial["bench_ids"]:
+                lines.append(f"| {name(pid)} | {pos_of(pid)} | {team_of(pid)} | {ep_of(pid):.2f} |")
+            lines.append("")
+        lines.append("## Transfers Suggestion")
+        lines.append("- 初始阵容未提供（非 15 人），转会建议不适用。")
     else:
+        lines.append("## Transfers Suggestion")
         lines.append(f"- Baseline XI pts: **{res['baseline_points']:.2f}**")
         lines.append(
             f"- Team Value (now → after): **{res['best_plan']['team_value_now']:.2f} → {res['best_plan']['team_value_after']:.2f}**"
@@ -208,18 +348,7 @@ def main(
     # Model performance snapshot (if metrics.json exists)
     metrics_path = out_dir / f"gw{gw:02d}" / "metrics.json"
     if metrics_path.exists():
-        try:
-            import json as _json
-
-            m = _json.loads(metrics_path.read_text(encoding="utf-8"))
-            ov = m.get("overall", {})
-            lines.append("")
-            lines.append("## Model Performance")
-            lines.append(
-                f"- Overall: MAE **{ov.get('mae', 0):.3f}**, RMSE **{ov.get('rmse', 0):.3f}**, NDCG@11 **{ov.get('ndcg_at_11', 0):.3f}**"
-            )
-        except Exception:
-            pass
+        lines.extend(_render_model_performance_section(metrics_path))
 
     # Rolling average (if history exists)
     hist_path = Path("data/processed/metrics_history.parquet")
@@ -274,6 +403,22 @@ def main(
             if not skip_transfers
             else {"skipped": True, "reason": "initial squad missing (need 15)"}
         ),
+        "initial_squad": (
+            {
+                "player_ids": init_res["player_ids"],
+                "cost": float(init_res["cost"]),
+                "bank": float(init_res["bank"]),
+                "xi": {
+                    "starting_ids": xi_initial["starting_ids"],
+                    "bench_ids": xi_initial["bench_ids"],
+                    "captain_id": xi_initial["captain_id"],
+                    "vice_id": xi_initial["vice_id"],
+                    "formation": xi_initial["formation"],
+                },
+            }
+            if skip_transfers
+            else None
+        ),
         "chips": chips,
         "thresholds": {
             "bench_boost_min_bench_ep": float(thresholds.bench_boost_min_bench_ep),
@@ -282,6 +427,9 @@ def main(
             "free_hit_min_active_starters": int(thresholds.free_hit_min_active_starters),
         },
         "blacklist": {"names": bl_names, "price_min": bl_price_min},
+        "whitelist": {
+            "names": wl_names_for_transfer,
+        },
     }
 
     # 可选：带上优化器默认参数（若存在）

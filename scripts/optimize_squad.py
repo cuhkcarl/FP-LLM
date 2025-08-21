@@ -147,6 +147,18 @@ def main(
     if respect_blacklist:
         bl_names, bl_price = _load_blacklist(Path("configs/base.yaml"))
         blacklist_names, blacklist_price_min = bl_names, bl_price
+    # 读取配置白名单
+    whitelist_names: list[str] | None = None
+    try:
+        cfg_path = Path("configs/base.yaml")
+        if cfg_path.exists():
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg = yaml.safe_load(f) or {}
+            wl = (cfg.get("whitelist") or {}).get("names")
+            if isinstance(wl, list) and len(wl) > 0:
+                whitelist_names = [str(x) for x in wl]
+    except Exception:
+        whitelist_names = None
 
     # ---------- 从 base.yaml 读取优化器默认参数（若存在） ----------
     try:
@@ -173,6 +185,7 @@ def main(
         hit_cost=hit_cost,
         blacklist_names=blacklist_names,
         blacklist_price_min=blacklist_price_min,
+        whitelist_names=whitelist_names,
         price_now_market=preds_raw.set_index("player_id")["price_now"].to_dict(),
         purchase_prices=purchase_prices,
         value_weight=value_weight,
