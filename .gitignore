@@ -18,3 +18,5 @@ data/raw/
 data/interim/
 reports/**/figs/
 models/
+.specstory/**
+.cursorindexingignore

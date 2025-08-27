@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Annotated, Any
@@ -15,6 +16,11 @@ from optimizer.squad_builder import BuildParams, build_initial_squad
 from optimizer.transfers import best_transfers, load_squad_yaml
 
 app = typer.Typer(add_completion=False)
+
+
+def _progress(msg: str) -> None:
+    if os.getenv("FP_PROGRESS"):
+        typer.echo(f"[progress] {msg}")
 
 
 def _name_map(preds: pd.DataFrame):
@@ -99,18 +105,25 @@ def main(
 ):
     # 指标-only 模式：不重生成其它内容，只更新报告中的指标段
     if metrics_only:
+        _progress(f"metrics-only mode for gw={gw}")
         metrics_path = out_dir / f"gw{gw:02d}" / "metrics.json"
         report_path = out_dir / f"gw{gw:02d}" / "report.md"
         _update_report_metrics_only(report_path, metrics_path)
         return
+    _progress("loading predictions parquet")
     preds = pd.read_parquet(data_dir / "processed" / f"predictions_gw{gw:02d}.parquet")
+    _progress(f"predictions loaded: {len(preds)} rows")
     fixtures_path = data_dir / "interim" / "fixtures_clean.parquet"
     fixtures = pd.read_parquet(fixtures_path) if fixtures_path.exists() else None
+    _progress("fixtures loaded" if fixtures is not None else "fixtures missing, skip")
 
+    _progress("loading squad.yaml")
     squad = load_squad_yaml(squad_file)
+    _progress(f"squad loaded: {len(squad.player_ids)} players, bank={squad.bank}")
     current_ids = [int(x) for x in squad.player_ids]
     current_pred = preds[preds["player_id"].isin(current_ids)].copy()
     if len(current_ids) != 15:
+        _progress("initial squad missing -> build_initial_squad begin")
         xi = {
             "starting_ids": [],
             "bench_ids": [],
@@ -155,13 +168,18 @@ def main(
             blacklist_price_min=bl_price_min,
             whitelist_names=wl_names,
         )
+        _progress("build_initial_squad done")
         init_ids = init_res["player_ids"]
         init_pred = preds[preds["player_id"].isin(init_ids)].copy()
+        _progress("solve_starting_xi for initial suggestion begin")
         xi_initial = solve_starting_xi(init_pred)
+        _progress("solve_starting_xi for initial suggestion done")
         # 顶部展示直接采用初始阵容的 XI/Bench，避免空表
         xi = xi_initial
     else:
+        _progress("solve_starting_xi begin")
         xi = solve_starting_xi(current_pred)
+        _progress("solve_starting_xi done")
         skip_transfers = False
 
     # transfers（尊重黑名单/高价阈值，与 CLI 行为保持一致）
@@ -193,6 +211,7 @@ def main(
             "team_value_after": 0.0,
         }
     else:
+        _progress("best_transfers begin")
         res = best_transfers(
             preds,
             squad,
@@ -203,9 +222,20 @@ def main(
             purchase_prices={},  # 报告不掌握买入价，回退为当前价（仅用于共同口径展示）
             value_weight=0.0,
         )
+        _progress("best_transfers done")
         bp = res["best_plan"]
+        # 计算转会后的 XI/Bench
+        try:
+            after_ids = bp.get("new_squad_ids", [])
+            after_pred = preds[preds["player_id"].isin(after_ids)].copy()
+            _progress("solve_starting_xi for after-transfers begin")
+            xi_after = solve_starting_xi(after_pred)
+            _progress("solve_starting_xi for after-transfers done")
+        except Exception:
+            xi_after = None
 
     # chips
+    _progress("suggest_chips begin")
     chips_available = {}
     try:
         with open(squad_file, encoding="utf-8") as f:
@@ -251,6 +281,7 @@ def main(
         chips_available=chips_available,
         thresholds=thresholds,
     )
+    _progress("suggest_chips done")
 
     name, ep_of, team_of, pos_of = _name_map(preds)
 
@@ -338,6 +369,29 @@ def main(
             lines.append(f"- In : {in_names}")
             lines.append(f"- New XI pts: **{bp['new_points']:.2f}**")
             lines.append(f"- Net gain (after hits): **{bp['net_gain']:.2f}**")
+        # 展示转会后建议首发/替补
+        if xi_after:
+            lines.append("")
+            lines.append("### Proposed XI After Transfers")
+            lines.append(f"- Formation: **{xi_after['formation']}**")
+            lines.append(f"- Captain: **{name(xi_after['captain_id'])}**")
+            lines.append(f"- Vice: **{name(xi_after['vice_id'])}**")
+            lines.append(
+                f"- Expected XI points (incl. C): **{xi_after['expected_points_xi_with_captain']:.2f}**"
+            )
+            lines.append("")
+            lines.append("| Player | Pos | Team | EP |")
+            lines.append("|---|---|---|---:|")
+            for pid in xi_after["starting_ids"]:
+                lines.append(f"| {name(pid)} | {pos_of(pid)} | {team_of(pid)} | {ep_of(pid):.2f} |")
+            lines.append("")
+            lines.append("### Bench (After Transfers)")
+            lines.append("| Player | Pos | Team | EP |")
+            lines.append("|---|---|---|---:|")
+            for pid in xi_after["bench_ids"]:
+                lines.append(f"| {name(pid)} | {pos_of(pid)} | {team_of(pid)} | {ep_of(pid):.2f} |")
+            bench_ep_after = sum(ep_of(pid) for pid in xi_after["bench_ids"])
+            lines.append(f"\n> Bench EP total: **{bench_ep_after:.2f}**")
     lines.append("")
 
     lines.append("## Chips")
@@ -372,6 +426,7 @@ def main(
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"gw{gw:02d}" / "report.md"
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    _progress("writing report.md")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     typer.echo(f"✅ wrote {out_path}")
 
@@ -399,9 +454,23 @@ def main(
                 "team_value_now": float(bp.get("team_value_now", 0.0)),
                 "team_value_after": float(bp.get("team_value_after", 0.0)),
                 "team_value_delta": float(bp.get("team_value_delta", 0.0)),
+                "new_squad_ids": [int(x) for x in bp.get("new_squad_ids", [])],
             }
             if not skip_transfers
             else {"skipped": True, "reason": "initial squad missing (need 15)"}
+        ),
+        "xi_after": (
+            {
+                "starting_ids": xi_after["starting_ids"],
+                "bench_ids": xi_after["bench_ids"],
+                "captain_id": xi_after["captain_id"],
+                "vice_id": xi_after["vice_id"],
+                "expected_points_xi_with_captain": float(
+                    xi_after["expected_points_xi_with_captain"]
+                ),
+            }
+            if (not skip_transfers and xi_after)
+            else None
         ),
         "initial_squad": (
             {
@@ -448,6 +517,7 @@ def main(
     except Exception:
         pass
 
+    _progress("writing summary.json")
     summary_path = out_dir / f"gw{gw:02d}" / "summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(
