@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import combinations
@@ -27,6 +28,11 @@ def load_squad_yaml(path: str | Path) -> Squad:
     bank = float(data.get("bank", 0.0))
     ft = int(data.get("free_transfers", 1))
     return Squad(player_ids=squad_ids, bank=bank, free_transfers=ft)
+
+
+def _progress(msg: str) -> None:
+    if os.getenv("FP_PROGRESS"):
+        print(f"[progress] {msg}")
 
 
 def _validate_squad_positions(squad_pred: pd.DataFrame) -> None:
@@ -107,13 +113,16 @@ def best_transfers(
     - 每队≤3；阵容位置配额固定（2GK/5DEF/5MID/3FWD）
     - 返回：baseline / best_plan（out_ids/in_ids/new_points/net_gain）
     """
+    _progress("best_transfers: start")
     pred_all = pred_all.copy()
     pred_all["player_id"] = pred_all["player_id"].astype(int)
     pred_all["team_id"] = pred_all["team_id"].astype(int)
 
     current_ids = [int(x) for x in squad.player_ids]
+    _progress(f"current squad loaded: {len(current_ids)} players; bank={squad.bank}")
     current_value = _squad_value(pred_all, current_ids)
     baseline_points = evaluate_squad_points(pred_all, current_ids)
+    _progress(f"baseline XI solved: {baseline_points:.3f} pts (current_value≈{current_value:.1f})")
 
     price_map = pred_all.set_index("player_id")["price_now"].to_dict()
     team_map = pred_all.set_index("player_id")["team_id"].to_dict()
@@ -185,6 +194,7 @@ def best_transfers(
 
     # 1 transfer：枚举每个 out，用同位置候选 pool 替换
     if max_transfers >= 1:
+        _progress("enumerating 1-transfer plans")
         for o in current_ids:
             pos = pos_map[o]
             cands = _select_candidates(
@@ -201,6 +211,7 @@ def best_transfers(
 
     # 2 transfers：枚举对数 + 同位置候选 pool 直积（剪枝靠预算/队数）
     if max_transfers >= 2:
+        _progress("enumerating 2-transfer plans")
         for o1, o2 in combinations(current_ids, 2):
             pos1, pos2 = pos_map[o1], pos_map[o2]
             pool1 = _select_candidates(
@@ -227,8 +238,14 @@ def best_transfers(
                         continue
                     plans.append(([o1, o2], [n1, n2]))
 
+    total_plans = len(plans)
+    _progress(f"plans prepared: {total_plans} -> evaluating")
+    try:
+        progress_every = max(1, int(os.getenv("FP_PROGRESS_EVERY", "200")))
+    except ValueError:
+        progress_every = 200
     # 评估所有 plan
-    for out_ids, in_ids in plans:
+    for idx, (out_ids, in_ids) in enumerate(plans, start=1):
         new_ids = _make_new_ids(out_ids, in_ids)
         if new_ids is None:
             continue
@@ -290,7 +307,10 @@ def best_transfers(
                 "team_value_after": float(team_value_after),
                 "team_value_delta": float(tv_delta),
             }
+        if idx % progress_every == 0:
+            _progress(f"evaluated {idx}/{total_plans} plans")
 
+    _progress("best_transfers: done")
     return {
         "baseline_points": baseline_points,
         "best_plan": best,
