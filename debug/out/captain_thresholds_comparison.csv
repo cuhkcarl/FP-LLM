@@ -1,0 +1,9 @@
+gw,variant,captain_before,ep_before,vice_before,transfers,hit_cost,net_gain,out,in,captain_after,ep_after
+1,no_threshold,Rogers,32.944987078334734,Semenyo,1,0,4.247214850122191,O.Dango,Gordon,Gordon,37.192201928456925
+1,config_threshold,Rogers,32.944987078334734,Semenyo,1,0,4.247214850122191,O.Dango,Gordon,Gordon,37.192201928456925
+2,no_threshold,Rogers,42.50449485423944,Semenyo,1,0,1.3468024878498284,O.Dango,Gordon,Gordon,43.85129734208927
+2,config_threshold,Rogers,42.50449485423944,Semenyo,1,0,1.3468024878498284,O.Dango,Gordon,Gordon,43.85129734208927
+3,no_threshold,Semenyo,58.77222769313511,Wood,1,0,1.6804392856894808,Mbeumo,Gakpo,Gakpo,60.45266697882459
+3,config_threshold,Semenyo,58.77222769313511,Wood,1,0,1.6804392856894808,Mbeumo,Gakpo,Gakpo,60.45266697882459
+4,no_threshold,O.Dango,66.08528495492163,Wood,1,0,1.492244804982036,Saliba,Gudmundsson,O.Dango,67.57752975990367
+4,config_threshold,Wood,64.69141943835987,O.Dango,1,0,1.4922448049820503,Saliba,Gudmundsson,Wood,66.18366424334192

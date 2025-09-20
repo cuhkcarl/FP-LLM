@@ -83,10 +83,42 @@ def _select_candidates(
     return df
 
 
-def evaluate_squad_points(pred_all: pd.DataFrame, squad_ids: list[int]) -> float:
+def _resolve_captain_thresholds(
+    df: pd.DataFrame,
+    min_minutes: float | None,
+    min_price: float | None,
+    label: str,
+) -> tuple[float | None, float | None]:
+    cap_minutes = min_minutes
+    cap_price = min_price
+    if df.empty:
+        return None, None
+    mask = pd.Series(True, index=df.index)
+    if cap_minutes is not None and "minutes" in df.columns:
+        mask &= df["minutes"].fillna(0.0) >= cap_minutes
+    if cap_price is not None and "price_now" in df.columns:
+        mask &= df["price_now"].fillna(0.0) >= cap_price
+    if not mask.any():
+        _progress(f"[warn] {label}: captain thresholds filtered out all players; fallback applied")
+        return None, None
+    return cap_minutes, cap_price
+
+
+def evaluate_squad_points(
+    pred_all: pd.DataFrame,
+    squad_ids: list[int],
+    *,
+    captain_min_minutes: float | None = None,
+    captain_min_price: float | None = None,
+) -> float:
     squad_pred = pred_all[pred_all["player_id"].isin(squad_ids)].copy()
     _validate_squad_positions(squad_pred)
-    res = solve_starting_xi(squad_pred)
+    cap_minutes, cap_price = _resolve_captain_thresholds(
+        squad_pred, captain_min_minutes, captain_min_price, "best_transfers"
+    )
+    res = solve_starting_xi(
+        squad_pred, captain_min_minutes=cap_minutes, captain_min_price=cap_price
+    )
     return float(res["expected_points_xi_with_captain"])
 
 
@@ -106,6 +138,8 @@ def best_transfers(
     value_weight: float = 0.0,
     min_bank_after: float | None = None,
     max_tv_drop: float | None = None,
+    captain_min_minutes: float | None = None,
+    captain_min_price: float | None = None,
 ) -> dict:
     """
     在 0/1/2 次转会内搜索最优方案。
@@ -121,7 +155,9 @@ def best_transfers(
     current_ids = [int(x) for x in squad.player_ids]
     _progress(f"current squad loaded: {len(current_ids)} players; bank={squad.bank}")
     current_value = _squad_value(pred_all, current_ids)
-    baseline_points = evaluate_squad_points(pred_all, current_ids)
+    baseline_points = evaluate_squad_points(
+        pred_all, current_ids, captain_min_minutes=captain_min_minutes, captain_min_price=captain_min_price
+    )
     _progress(f"baseline XI solved: {baseline_points:.3f} pts (current_value≈{current_value:.1f})")
 
     price_map = pred_all.set_index("player_id")["price_now"].to_dict()
@@ -249,7 +285,12 @@ def best_transfers(
         new_ids = _make_new_ids(out_ids, in_ids)
         if new_ids is None:
             continue
-        new_points = evaluate_squad_points(pred_all, new_ids)
+        new_points = evaluate_squad_points(
+            pred_all,
+            new_ids,
+            captain_min_minutes=captain_min_minutes,
+            captain_min_price=captain_min_price,
+        )
         transfers_cnt = len(out_ids)
         paid_hits = max(0, transfers_cnt - squad.free_transfers)
         cost = paid_hits * hit_cost

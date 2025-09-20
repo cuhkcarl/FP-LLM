@@ -5,11 +5,36 @@ from typing import Annotated
 
 import pandas as pd
 import typer
+import yaml
 
 from prediction.baseline import BaselineParams, predict_from_features
 from prediction.cold_start import ColdStartParams, compute_cold_start_ep
 
 app = typer.Typer(add_completion=False)
+
+
+def _load_prediction_config(config_path: Path | None) -> dict[str, float]:
+    defaults = {
+        "price_tie_weight": 0.1,
+        "minutes_for_full_weight": 180.0,
+        "minutes_weight_exponent": 0.5,
+    }
+    if config_path is None or not config_path.exists():
+        return defaults
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        pred_cfg = cfg.get("prediction") or {}
+        ranking_cfg = pred_cfg.get("ranking") or {}
+        if "price_weight" in ranking_cfg:
+            defaults["price_tie_weight"] = float(ranking_cfg["price_weight"])
+        if "minutes_for_full_weight" in ranking_cfg:
+            defaults["minutes_for_full_weight"] = float(ranking_cfg["minutes_for_full_weight"])
+        if "minutes_weight_exponent" in ranking_cfg:
+            defaults["minutes_weight_exponent"] = float(ranking_cfg["minutes_weight_exponent"])
+    except Exception:
+        pass
+    return defaults
 
 
 @app.command()
@@ -25,10 +50,15 @@ def main(
         float, typer.Option(help="可用性幂次（<1 放大影响，>1 收缩)")
     ] = 1.0,
     mode: Annotated[str, typer.Option(help="baseline / cold_start / blend")] = "baseline",
-    blend_decay_gws: Annotated[int, typer.Option(help="冷启动权重衰减窗口（GW1→GWk 渐退)")] = 4,
+    blend_decay_gws: Annotated[int, typer.Option(help="冷启动权重衰减窗口（GW1→GWk 渐退)")] = 2,
+    min_minutes_blend_drop: Annotated[
+        float,
+        typer.Option(help="当季分钟达到该值时，不再引用冷启动先验"),
+    ] = 180.0,
     data_root: Annotated[Path, typer.Option(help="数据根目录（raw/interim/processed)")] = Path(
         "data"
     ),
+    config_path: Annotated[Path, typer.Option(help="配置文件路径")] = Path("configs/base.yaml"),
 ):
     """
     读取 M2 产物，输出 expected_points（M3 基线预测）。
@@ -40,8 +70,13 @@ def main(
     out_path = out_dir / out_name
 
     # Baseline
+    prediction_cfg = _load_prediction_config(config_path if config_path.exists() else None)
     params = BaselineParams(
-        min_availability=min_availability, availability_power=availability_power
+        min_availability=min_availability,
+        availability_power=availability_power,
+        price_tie_weight=prediction_cfg["price_tie_weight"],
+        minutes_for_full_weight=prediction_cfg["minutes_for_full_weight"],
+        minutes_weight_exponent=prediction_cfg["minutes_weight_exponent"],
     )
     df_base = predict_from_features(in_path, out_path=None, params=params)
 
@@ -76,8 +111,16 @@ def main(
                     w_cs = 0.0
                 else:
                     w_cs = max(0.0, 1.0 - (max(gw, 1) - 1) / max(1, blend_decay_gws))
+
+                blend_weights: float | pd.Series = w_cs
+                if w_cs > 0.0 and "minutes" in df_final.columns:
+                    minutes_series = pd.to_numeric(df_final["minutes"], errors="coerce")
+                    blend_weights = pd.Series(w_cs, index=df_final.index, dtype=float)
+                    blend_weights[minutes_series.fillna(0.0) >= min_minutes_blend_drop] = 0.0
+
                 df_final["expected_points"] = (
-                    w_cs * df_final["cs_ep"] + (1.0 - w_cs) * df_final["expected_points"]
+                    blend_weights * df_final["cs_ep"]
+                    + (1.0 - blend_weights) * df_final["expected_points"]
                 )
 
     # 写出

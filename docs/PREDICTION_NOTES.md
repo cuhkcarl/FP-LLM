@@ -122,3 +122,29 @@ recent_score_wma * (1 - alpha_pos * (mean_fdr - 3) / 2) * (1 + beta_pos * home_r
 - 位置惩罚/奖励：`alpha_pos={GK:0.10, DEF:0.10, MID:0.08, FWD:0.06}`；`beta_pos={GK:0.02, DEF:0.03, MID:0.03, FWD:0.04}`
 - 首发阈值：`availability_score>=0.70`
 - 输出文件：`data/processed/features.parquet`（或 `features_gwXX.parquet`）
+
+## 5) 配置与参数（默认）
+
+- `build_features.py`
+  - `--gw`: 指定构建哪一轮（不填则按当前时间判定未来赛程窗口）
+  - `--k`: 未来赛程窗口大小（默认 3）
+  - `--config-path`: 读取 `configs/base.yaml` 中的排名参数
+- `predict_points.py`
+  - `--mode baseline | cold_start | blend`
+  - `--blend-decay-gws`: blend 模式的衰减窗口（默认 4）
+  - `--min-availability` & `--availability-power`: 可用性阈值与幂次
+  - `--config-path`: 与特征构建保持一致，确保排名参数一致
+
+### `prediction.ranking` 可调项
+
+```yaml
+prediction:
+  ranking:
+    shrink_k: 3.0                # 分钟收缩强度（分钟/90 的伪场次）
+    minutes_penalty: 1.0         # 低分钟回落幅度
+    price_weight: 0.1            # 价格轻量加权（用于区分平分）
+    minutes_for_full_weight: 180 # 达到该分钟视为权重满额
+    minutes_weight_exponent: 0.5 # 低分钟折扣的指数
+```
+
+参数为空时会退回默认值；修改配置后需要重新运行 `build_features.py` 或使用辅助脚本回写历史 features，再重新执行 `predict_points.py`。
