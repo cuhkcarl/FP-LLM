@@ -74,3 +74,19 @@
 - **triple_captain**: no — captain EP below threshold  `{'captain_ep': 6.121484335781258, 'captain_double': False}`
 - **free_hit**: no — enough active starters  `{'active_likely_starters': 14}`
 - **wildcard**: no — not auto-triggered (needs structural check)  `{}`
+
+
+## Model Performance
+- Overall: MAE **1.927**, RMSE **2.338**, NDCG@11 **0.025**
+
+### Team Scoring Summary
+- **Predicted Team Total**: 57.67 points
+- **Actual Team Total**: 46 points
+- **Prediction Error**: -11.67 points
+- **Captain Score**: 2.0 points (bonus: +2.0)
+- **Bench Total**: 10.0 points
+
+### Transfer Analysis
+- **Predicted Transfer Gain**: 1.62 points
+- **Actual Transfer Gain**: -4 points
+- **Transfer Prediction Error**: 5.62 points

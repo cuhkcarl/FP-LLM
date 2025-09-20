@@ -1,0 +1,164 @@
+{
+  "gw": 3,
+  "overall": {
+    "mae": 1.9268467137524734,
+    "rmse": 2.3377547943042853,
+    "spearman": 0.6616611798088243,
+    "ndcg_at_11": 0.024696920002622528
+  },
+  "by_pos": {
+    "GK": {
+      "mae": 1.737137245347526,
+      "rmse": 1.9952516871900488,
+      "ndcg_at_11": 0.15361156349108
+    },
+    "DEF": {
+      "mae": 1.9325969023801364,
+      "rmse": 2.47642511863269,
+      "ndcg_at_11": 0.01866716481913138
+    },
+    "MID": {
+      "mae": 1.9132922224881492,
+      "rmse": 2.299657279987726,
+      "ndcg_at_11": 0.09084795980279843
+    },
+    "FWD": {
+      "mae": 2.1734314005505926,
+      "rmse": 2.397749543438552,
+      "ndcg_at_11": 0.5458641293802129
+    }
+  },
+  "team_performance": {
+    "predicted_total": 57.66853640598187,
+    "actual_total": 46.0,
+    "prediction_error": -11.668536405981868,
+    "prediction_accuracy": 11.668536405981868,
+    "total_score": 46.0,
+    "starting_xi_score": 44.0,
+    "captain_score": 2.0,
+    "captain_bonus": 2.0,
+    "bench_total": 10.0,
+    "starting_scores": [
+      {
+        "player_id": 82,
+        "score": 2.0
+      },
+      {
+        "player_id": 83,
+        "score": 2.0
+      },
+      {
+        "player_id": 525,
+        "score": 2.0
+      },
+      {
+        "player_id": 582,
+        "score": 2.0
+      },
+      {
+        "player_id": 47,
+        "score": 2.0
+      },
+      {
+        "player_id": 1,
+        "score": 2.0
+      },
+      {
+        "player_id": 624,
+        "score": 9.0
+      },
+      {
+        "player_id": 119,
+        "score": 10.0
+      },
+      {
+        "player_id": 6,
+        "score": 1.0
+      },
+      {
+        "player_id": 476,
+        "score": 6.0
+      },
+      {
+        "player_id": 258,
+        "score": 6.0
+      }
+    ],
+    "bench_scores": [
+      {
+        "player_id": 64,
+        "score": 2.0
+      },
+      {
+        "player_id": 402,
+        "score": 0.0
+      },
+      {
+        "player_id": 410,
+        "score": 1.0
+      },
+      {
+        "player_id": 253,
+        "score": 7.0
+      }
+    ]
+  },
+  "transfer_performance": {
+    "predicted_gain": 1.622526948305648,
+    "actual_gain": -4.0,
+    "after_predicted_total": 59.291063354287516,
+    "after_actual_total": 42.0,
+    "total_score": 42.0,
+    "starting_xi_score": 40.0,
+    "captain_score": 2.0,
+    "captain_bonus": 2.0,
+    "bench_total": 0,
+    "starting_scores": [
+      {
+        "player_id": 82,
+        "score": 2.0
+      },
+      {
+        "player_id": 83,
+        "score": 2.0
+      },
+      {
+        "player_id": 525,
+        "score": 2.0
+      },
+      {
+        "player_id": 8,
+        "score": 2.0
+      },
+      {
+        "player_id": 582,
+        "score": 2.0
+      },
+      {
+        "player_id": 47,
+        "score": 2.0
+      },
+      {
+        "player_id": 1,
+        "score": 2.0
+      },
+      {
+        "player_id": 624,
+        "score": 9.0
+      },
+      {
+        "player_id": 119,
+        "score": 10.0
+      },
+      {
+        "player_id": 6,
+        "score": 1.0
+      },
+      {
+        "player_id": 476,
+        "score": 6.0
+      }
+    ],
+    "bench_scores": []
+  }
+}

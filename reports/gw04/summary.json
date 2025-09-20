@@ -1,55 +1,55 @@
 {
-  "gw": 3,
+  "gw": 4,
   "xi": {
     "starting_ids": [
-      82,
       83,
+      82,
       525,
-      582,
-      47,
-      1,
-      624,
       119,
-      6,
+      624,
+      47,
+      582,
+      410,
+      1,
       476,
       258
     ],
     "bench_ids": [
       64,
+      6,
       402,
-      410,
       253
     ],
-    "captain_id": 82,
-    "vice_id": 83,
-    "expected_points_xi_with_captain": 57.66853640598187,
-    "bench_ep": 14.259531327263726
+    "captain_id": 83,
+    "vice_id": 82,
+    "expected_points_xi_with_captain": 62.035170384545665,
+    "bench_ep": 14.191801807363259
   },
   "transfers": {
-    "baseline_points": 57.66853640598187,
+    "baseline_points": 62.035170384545665,
     "transfers": 1,
     "out_ids": [
-      402
+      582
     ],
     "in_ids": [
-      8
+      237
     ],
     "hit_cost": 0,
-    "new_points": 59.291063354287516,
-    "net_gain": 1.622526948305648,
-    "bank_after": 3.9,
-    "team_value_now": 100.4,
-    "team_value_after": 100.4,
+    "new_points": 63.57793997649332,
+    "net_gain": 1.5427695919476534,
+    "bank_after": 3.3,
+    "team_value_now": 99.9,
+    "team_value_after": 99.9,
     "team_value_delta": 0.0,
     "new_squad_ids": [
       82,
-      582,
+      237,
       525,
       47,
       1,
       83,
       6,
-      8,
+      402,
       476,
       258,
       410,
@@ -61,27 +61,27 @@
   },
   "xi_after": {
     "starting_ids": [
-      82,
       83,
+      237,
+      82,
       525,
-      8,
-      582,
-      47,
-      1,
-      624,
       119,
-      6,
-      476
+      624,
+      47,
+      410,
+      1,
+      476,
+      258
     ],
     "bench_ids": [
       64,
-      258,
-      410,
+      6,
+      402,
       253
     ],
-    "captain_id": 82,
-    "vice_id": 83,
-    "expected_points_xi_with_captain": 59.291063354287516
+    "captain_id": 83,
+    "vice_id": 237,
+    "expected_points_xi_with_captain": 63.57793997649332
   },
   "initial_squad": null,
   "chips": {
@@ -89,14 +89,14 @@
       "recommended": false,
       "reason": "bench EP below threshold",
       "metrics": {
-        "bench_ep": 14.259531327263726
+        "bench_ep": 14.191801807363259
       }
     },
     "triple_captain": {
       "recommended": false,
       "reason": "captain EP below threshold",
       "metrics": {
-        "captain_ep": 6.121484335781258,
+        "captain_ep": 6.478578062346179,
         "captain_double": false
       }
     },
@@ -104,7 +104,7 @@
       "recommended": false,
       "reason": "enough active starters",
       "metrics": {
-        "active_likely_starters": 14
+        "active_likely_starters": 13
       }
     },
     "wildcard": {
