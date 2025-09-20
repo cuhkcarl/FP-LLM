@@ -63,6 +63,41 @@ def _render_model_performance_section(metrics_path: Path) -> list[str]:
         lines.append(
             f"- Overall: MAE **{ov.get('mae', 0):.3f}**, RMSE **{ov.get('rmse', 0):.3f}**, NDCG@11 **{ov.get('ndcg_at_11', 0):.3f}**"
         )
+
+        # Add team performance if available
+        team_perf = m.get("team_performance", {})
+        if team_perf:
+            lines.append("")
+            lines.append("### Team Scoring Summary")
+            predicted = team_perf.get("predicted_total", 0)
+            actual = team_perf.get("actual_total", 0)
+            error = team_perf.get("prediction_error", 0)
+            lines.append(f"- **Predicted Team Total**: {predicted:.2f} points")
+            lines.append(f"- **Actual Team Total**: {actual:.0f} points")
+            lines.append(f"- **Prediction Error**: {error:+.2f} points")
+
+            # Captain performance
+            captain_score = team_perf.get("captain_score", 0)
+            captain_bonus = team_perf.get("captain_bonus", 0)
+            lines.append(f"- **Captain Score**: {captain_score} points (bonus: +{captain_bonus})")
+
+            # Bench information
+            bench_total = team_perf.get("bench_total", 0)
+            lines.append(f"- **Bench Total**: {bench_total} points")
+
+        # Add transfer performance if available
+        transfer_perf = m.get("transfer_performance", {})
+        if transfer_perf:
+            lines.append("")
+            lines.append("### Transfer Analysis")
+            predicted_gain = transfer_perf.get("predicted_gain", 0)
+            actual_gain = transfer_perf.get("actual_gain", 0)
+            lines.append(f"- **Predicted Transfer Gain**: {predicted_gain:.2f} points")
+            lines.append(f"- **Actual Transfer Gain**: {actual_gain:.0f} points")
+            if predicted_gain != 0:
+                transfer_accuracy = abs(actual_gain - predicted_gain)
+                lines.append(f"- **Transfer Prediction Error**: {transfer_accuracy:.2f} points")
+
         return lines
     except Exception:
         return []
@@ -198,6 +233,16 @@ def main(
                 wl_names_for_transfer = [str(x) for x in wl]
         except Exception:
             wl_names_for_transfer = None
+    # 读取买入价（用于更贴近真实预算/队值计算）
+    purchase_prices: dict[int, float] = {}
+    try:
+        with open(squad_file, encoding="utf-8") as f:
+            sdata_pp = yaml.safe_load(f) or {}
+        pp = sdata_pp.get("purchase_prices") or {}
+        purchase_prices = {int(k): float(v) for k, v in pp.items()}
+    except Exception:
+        purchase_prices = {}
+
     if skip_transfers:
         res = {"baseline_points": 0.0}
         bp = {
@@ -219,7 +264,7 @@ def main(
             blacklist_price_min=bl_price_min,
             whitelist_names=wl_names_for_transfer,
             price_now_market=preds.set_index("player_id")["price_now"].to_dict(),
-            purchase_prices={},  # 报告不掌握买入价，回退为当前价（仅用于共同口径展示）
+            purchase_prices=purchase_prices,
             value_weight=0.0,
         )
         _progress("best_transfers done")
@@ -403,6 +448,71 @@ def main(
     metrics_path = out_dir / f"gw{gw:02d}" / "metrics.json"
     if metrics_path.exists():
         lines.extend(_render_model_performance_section(metrics_path))
+
+    # Cumulative scoring summary across gameweeks
+    try:
+        import glob
+        import json as _json
+
+        import pandas as _pd
+
+        # Collect all metrics files to build cumulative summary
+        metrics_files = glob.glob(str(out_dir / "gw*" / "metrics.json"))
+        if metrics_files:
+            scoring_data = []
+            for metrics_file in sorted(metrics_files):
+                try:
+                    with open(metrics_file, encoding="utf-8") as f:
+                        metrics = _json.load(f)
+                    gw_num = metrics.get("gw", 0)
+                    team_perf = metrics.get("team_performance", {})
+
+                    if team_perf:
+                        scoring_data.append(
+                            {
+                                "gw": gw_num,
+                                "predicted": team_perf.get("predicted_total", 0),
+                                "actual": team_perf.get("actual_total", 0),
+                                "error": team_perf.get("prediction_error", 0),
+                            }
+                        )
+                except Exception:
+                    continue
+
+            if scoring_data and len(scoring_data) > 1:
+                df = _pd.DataFrame(scoring_data)
+                lines.append("")
+                lines.append("### Cumulative Performance")
+
+                total_predicted = df["predicted"].sum()
+                total_actual = df["actual"].sum()
+                total_error = df["error"].sum()
+                avg_weekly_actual = df["actual"].mean()
+
+                lines.append(
+                    f"- **Total Points ({len(df)} GWs)**: {total_actual:.0f} (predicted: {total_predicted:.1f})"
+                )
+                lines.append(f"- **Average Per GW**: {avg_weekly_actual:.1f} points")
+                lines.append(f"- **Cumulative Error**: {total_error:+.1f} points")
+
+                # Recent form
+                if len(df) >= 3:
+                    recent_3 = df.tail(3)
+                    recent_avg = recent_3["actual"].mean()
+                    lines.append(f"- **Recent 3 GW Average**: {recent_avg:.1f} points")
+
+                # Best and worst gameweeks
+                best_gw = df.loc[df["actual"].idxmax()]
+                worst_gw = df.loc[df["actual"].idxmin()]
+                lines.append(
+                    f"- **Best GW**: GW{best_gw['gw']:.0f} ({best_gw['actual']:.0f} points)"
+                )
+                lines.append(
+                    f"- **Worst GW**: GW{worst_gw['gw']:.0f} ({worst_gw['actual']:.0f} points)"
+                )
+
+    except Exception:
+        pass
 
     # Rolling average (if history exists)
     hist_path = Path("data/processed/metrics_history.parquet")

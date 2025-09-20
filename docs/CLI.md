@@ -80,6 +80,19 @@ python scripts/generate_report.py --gw 1
 # 若存在 metrics.json，将在报告中附“Model Performance”；若存在 metrics_history.parquet，将附“近 5 轮平均”
 ```
 
+## 6.5) 回写阵容（可选）
+- 将某轮报告中的“转会后阵容”回写到 `configs/squad.yaml`（建议在你已在官网执行转会后使用）：
+```bash
+python scripts/apply_transfers.py --gw 3           # 预览（dry-run）
+python scripts/apply_transfers.py --gw 3 --confirm # 确认写入
+```
+- 行为：
+  - 用 `reports/gw03/summary.json.transfers.new_squad_ids` 更新 `squad`
+  - 用 `bank_after` 更新 `bank`
+  - 将 `free_transfers` 置为 1（保守默认）
+  - 若存在 `data/processed/predictions_gw03.parquet`，为新入队员填充 `purchase_prices`（使用 `price_now`）
+
+
 ## 7) 历史回填（可选）
 - 批量回填多轮指标，并维护汇总：
 ```bash

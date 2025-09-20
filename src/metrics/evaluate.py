@@ -74,6 +74,54 @@ def compute_metrics(
     return {"overall": overall, "by_pos": _by_pos()}
 
 
+def compute_team_score(
+    starting_ids: list[int],
+    captain_id: int,
+    actuals: pd.DataFrame,
+    bench_ids: list[int] | None = None,
+) -> dict[str, Any]:
+    """Calculate actual team score for a given lineup."""
+    actuals_indexed = actuals.set_index("player_id")
+
+    # Calculate starting XI scores
+    starting_scores = []
+    total_score = 0
+    captain_score = 0
+
+    for pid in starting_ids:
+        if pid in actuals_indexed.index:
+            score = float(actuals_indexed.loc[pid, "total_points"])
+            starting_scores.append({"player_id": pid, "score": score})
+            total_score += score
+            if pid == captain_id:
+                captain_score = score
+                total_score += score  # Captain gets double points
+        else:
+            starting_scores.append({"player_id": pid, "score": 0})
+
+    # Calculate bench scores if provided
+    bench_scores = []
+    bench_total = 0
+    if bench_ids:
+        for pid in bench_ids:
+            if pid in actuals_indexed.index:
+                score = float(actuals_indexed.loc[pid, "total_points"])
+                bench_scores.append({"player_id": pid, "score": score})
+                bench_total += score
+            else:
+                bench_scores.append({"player_id": pid, "score": 0})
+
+    return {
+        "total_score": total_score,
+        "starting_xi_score": total_score - captain_score,  # Without captain bonus
+        "captain_score": captain_score,
+        "captain_bonus": captain_score,
+        "bench_total": bench_total,
+        "starting_scores": starting_scores,
+        "bench_scores": bench_scores,
+    }
+
+
 def write_metrics_json(
     *,
     gw: int,

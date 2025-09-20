@@ -27,5 +27,80 @@
       "rmse": 2.703838642999446,
       "ndcg_at_11": 0.00047862149165044023
     }
+  },
+  "team_performance": {
+    "predicted_total": 54.09530171104614,
+    "actual_total": 41.0,
+    "prediction_error": -13.09530171104614,
+    "prediction_accuracy": 13.09530171104614,
+    "total_score": 41.0,
+    "starting_xi_score": 35.0,
+    "captain_score": 6.0,
+    "captain_bonus": 6.0,
+    "bench_total": 13.0,
+    "starting_scores": [
+      {
+        "player_id": 82,
+        "score": 6.0
+      },
+      {
+        "player_id": 525,
+        "score": 2.0
+      },
+      {
+        "player_id": 47,
+        "score": 2.0
+      },
+      {
+        "player_id": 119,
+        "score": 2.0
+      },
+      {
+        "player_id": 624,
+        "score": 2.0
+      },
+      {
+        "player_id": 241,
+        "score": 8.0
+      },
+      {
+        "player_id": 582,
+        "score": 3.0
+      },
+      {
+        "player_id": 1,
+        "score": 6.0
+      },
+      {
+        "player_id": 476,
+        "score": 2.0
+      },
+      {
+        "player_id": 402,
+        "score": 1.0
+      },
+      {
+        "player_id": 258,
+        "score": 1.0
+      }
+    ],
+    "bench_scores": [
+      {
+        "player_id": 64,
+        "score": 2.0
+      },
+      {
+        "player_id": 6,
+        "score": 6.0
+      },
+      {
+        "player_id": 257,
+        "score": 3.0
+      },
+      {
+        "player_id": 253,
+        "score": 2.0
+      }
+    ]
   }
 }

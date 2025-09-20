@@ -12,4 +12,4 @@ python scripts/fetch_actuals.py --gw $GW --force-refresh
 python scripts/evaluate_gw.py --gw $GW
 
 # 4) 重新生成报告（整合模型表现指标）
-python scripts/generate_report.py --gw $GW | cat
+python scripts/generate_report.py --gw $GW --metrics-only | cat
