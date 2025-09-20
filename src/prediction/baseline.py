@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 
 
+Z_SCORE_CLIP = 2.0
+
+
 @dataclass(frozen=True)
 class BaselineParams:
     # 位置基线（大致贴合常见每轮均分区间），可按需调
@@ -16,6 +19,9 @@ class BaselineParams:
     max_points: float = 12.0
     min_availability: float = 0.0  # < 该值则硬降为 0（极端不出场）
     availability_power: float = 1.0  # 可调软权重（<1 放大，>1 收缩）
+    minutes_for_full_weight: float = 180.0
+    minutes_weight_exponent: float = 0.5
+    price_tie_weight: float = 0.0
 
     def __post_init__(self) -> None:
         if self.base_by_pos is None:
@@ -46,6 +52,7 @@ def _position_scale(df_pos: pd.DataFrame, pos: str, params: BaselineParams) -> p
     mean = float(x.mean())
     std = float(x.std(ddof=0)) or 1e-6
     z = (x - mean) / std
+    z = np.clip(z, -Z_SCORE_CLIP, Z_SCORE_CLIP)
 
     exp_points = base + spread * z
     exp_points = exp_points.clip(params.min_points, params.max_points)
@@ -57,6 +64,21 @@ def _position_scale(df_pos: pd.DataFrame, pos: str, params: BaselineParams) -> p
     exp_points = np.where(
         avail < params.min_availability, 0.0, exp_points * (avail**params.availability_power)
     )
+
+    # 低分钟球员做软折扣，避免单轮爆点占据榜首
+    minutes = _safe(df_pos.get("minutes", pd.Series(index=df_pos.index, dtype=float))).fillna(0.0)
+    minutes_for_full = max(params.minutes_for_full_weight, 1e-6)
+    minutes_factor = np.power(
+        np.clip(minutes / minutes_for_full, 0.0, 1.0), params.minutes_weight_exponent
+    )
+    exp_points = exp_points * minutes_factor
+
+    if params.price_tie_weight != 0.0:
+        price = _safe(df_pos.get("price_now", pd.Series(index=df_pos.index, dtype=float)))
+        price_mean = float(price.mean()) if not price.isna().all() else 0.0
+        price_std = float(price.std(ddof=0)) or 1.0
+        price_scaled = (price.fillna(price_mean) - price_mean) / price_std
+        exp_points = exp_points + params.price_tie_weight * price_scaled
 
     return pd.Series(exp_points, index=df_pos.index)
 
@@ -83,6 +105,7 @@ def predict_from_features(
         "selected_by_pct",
         "fdr_adjusted_recent_score",
         "availability_score",
+        "minutes",
     ]
     for c in need:
         if c not in feats.columns:

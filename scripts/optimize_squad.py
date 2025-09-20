@@ -43,6 +43,29 @@ def _load_blacklist(cfg_path: Path) -> tuple[list[str] | None, float | None]:
         return None, None
 
 
+def _resolve_captain_thresholds(
+    df: pd.DataFrame,
+    min_minutes: float | None,
+    min_price: float | None,
+    label: str,
+) -> tuple[float | None, float | None]:
+    cap_minutes = min_minutes
+    cap_price = min_price
+    if df.empty:
+        return None, None
+    mask = pd.Series(True, index=df.index)
+    if cap_minutes is not None and "minutes" in df.columns:
+        mask &= df["minutes"].fillna(0.0) >= cap_minutes
+    if cap_price is not None and "price_now" in df.columns:
+        mask &= df["price_now"].fillna(0.0) >= cap_price
+    if not mask.any():
+        typer.echo(
+            f"[warn] {label}: captain thresholds filtered out all players; falling back to defaults"
+        )
+        return None, None
+    return cap_minutes, cap_price
+
+
 @app.command()
 def main(
     gw: Annotated[
@@ -81,6 +104,14 @@ def main(
     ] = None,
     max_tv_drop: Annotated[
         float | None, typer.Option(help="允许的队值最大下降（m，默认不限制）")
+    ] = None,
+    captain_min_minutes: Annotated[
+        float | None,
+        typer.Option(help="队长候选需达到的分钟阈值（总分钟，默认不限制)"),
+    ] = None,
+    captain_min_price: Annotated[
+        float | None,
+        typer.Option(help="队长候选需达到的身价阈值（m，默认不限制)"),
     ] = None,
 ):
     """
@@ -134,11 +165,37 @@ def main(
     if use_dgw_adjust and gw is not None and fixtures is not None:
         preds = adjust_expected_points_for_gw(preds, fixtures, gw, DGWParams())
 
+    # ---------- 优化器默认参数（含队长阈值） ----------
+    try:
+        cfg_path = Path("configs/base.yaml")
+        if cfg_path.exists():
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg_opt: dict[str, Any] = yaml.safe_load(f) or {}
+            opt_cfg = cfg_opt.get("optimizer") or {}
+            if value_weight == 0.0 and "value_weight" in opt_cfg:
+                value_weight = float(opt_cfg.get("value_weight", value_weight))
+            if min_bank_after is None and opt_cfg.get("min_bank_after") is not None:
+                min_bank_after = float(opt_cfg.get("min_bank_after"))
+            if max_tv_drop is None and opt_cfg.get("max_tv_drop") is not None:
+                max_tv_drop = float(opt_cfg.get("max_tv_drop"))
+            if captain_min_minutes is None and opt_cfg.get("captain_min_minutes") is not None:
+                captain_min_minutes = float(opt_cfg.get("captain_min_minutes"))
+            if captain_min_price is None and opt_cfg.get("captain_min_price") is not None:
+                captain_min_price = float(opt_cfg.get("captain_min_price"))
+    except Exception:
+        pass
+
     # ---------- 当前 XI 与替补 ----------
     squad_pred = preds[preds["player_id"].isin(current_ids)].copy()
+    cap_minutes, cap_price = _resolve_captain_thresholds(
+        squad_pred, captain_min_minutes, captain_min_price, "current XI"
+    )
+
     xi = solve_starting_xi(
         squad_pred,
         bench_params=BenchOrderParams(weight_availability=bench_weight_availability),
+        captain_min_minutes=cap_minutes,
+        captain_min_price=cap_price,
     )
 
     # ---------- 黑名单（可选） ----------
@@ -161,21 +218,6 @@ def main(
         whitelist_names = None
 
     # ---------- 从 base.yaml 读取优化器默认参数（若存在） ----------
-    try:
-        cfg_path = Path("configs/base.yaml")
-        if cfg_path.exists():
-            with open(cfg_path, encoding="utf-8") as f:
-                cfg: dict[str, Any] = yaml.safe_load(f) or {}
-            opt_cfg = cfg.get("optimizer") or {}
-            if value_weight == 0.0 and "value_weight" in opt_cfg:
-                value_weight = float(opt_cfg.get("value_weight", value_weight))
-            if min_bank_after is None and opt_cfg.get("min_bank_after") is not None:
-                min_bank_after = float(opt_cfg.get("min_bank_after"))
-            if max_tv_drop is None and opt_cfg.get("max_tv_drop") is not None:
-                max_tv_drop = float(opt_cfg.get("max_tv_drop"))
-    except Exception:
-        pass
-
     # ---------- 转会枚举（此时 preds 的我方成员 price_now 已是卖出价） ----------
     result = best_transfers(
         preds,
@@ -191,6 +233,8 @@ def main(
         value_weight=value_weight,
         min_bank_after=min_bank_after,
         max_tv_drop=max_tv_drop,
+        captain_min_minutes=cap_minutes,
+        captain_min_price=cap_price,
     )
 
     # ---------- 输出摘要 ----------

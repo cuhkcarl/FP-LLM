@@ -20,3 +20,4 @@ reports/**/figs/
 models/
 .specstory/**
 .cursorindexingignore
+.cursor/

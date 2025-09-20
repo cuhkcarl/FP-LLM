@@ -21,6 +21,12 @@ prediction:
     DEF: 1.2
     MID: 1.4
     FWD: 1.4
+  ranking:
+    shrink_k: 3.0
+    minutes_penalty: 1.0
+    price_weight: 0.1
+    minutes_for_full_weight: 180.0
+    minutes_weight_exponent: 0.5
 chips:
   thresholds:
     bench_boost_min_bench_ep: 20.0
@@ -39,3 +45,5 @@ optimizer:
     w_ep: 1.0
     w_avail: 0.3
     w_vpm: 0.1
+  captain_min_minutes: 200
+  captain_min_price: 7.5

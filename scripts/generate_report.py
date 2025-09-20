@@ -51,6 +51,29 @@ def _load_blacklist(cfg_path: Path) -> tuple[list[str] | None, float | None]:
         return None, None
 
 
+def _resolve_captain_thresholds(
+    df: pd.DataFrame,
+    min_minutes: float | None,
+    min_price: float | None,
+    label: str,
+) -> tuple[float | None, float | None]:
+    cap_minutes = min_minutes
+    cap_price = min_price
+    if df.empty:
+        return None, None
+    mask = pd.Series(True, index=df.index)
+    if cap_minutes is not None and "minutes" in df.columns:
+        mask &= df["minutes"].fillna(0.0) >= cap_minutes
+    if cap_price is not None and "price_now" in df.columns:
+        mask &= df["price_now"].fillna(0.0) >= cap_price
+    if not mask.any():
+        typer.echo(
+            f"[warn] {label}: captain thresholds filtered out all players; falling back to defaults"
+        )
+        return None, None
+    return cap_minutes, cap_price
+
+
 def _render_model_performance_section(metrics_path: Path) -> list[str]:
     try:
         import json as _json
@@ -137,6 +160,14 @@ def main(
         bool,
         typer.Option("--metrics-only/--no-metrics-only", help="仅更新/写入 Model Performance 段落"),
     ] = False,
+    captain_min_minutes: Annotated[
+        float | None,
+        typer.Option(help="队长候选需达到的分钟阈值（总分钟，默认不限制)"),
+    ] = None,
+    captain_min_price: Annotated[
+        float | None,
+        typer.Option(help="队长候选需达到的身价阈值（m，默认不限制)"),
+    ] = None,
 ):
     # 指标-only 模式：不重生成其它内容，只更新报告中的指标段
     if metrics_only:
@@ -145,6 +176,21 @@ def main(
         report_path = out_dir / f"gw{gw:02d}" / "report.md"
         _update_report_metrics_only(report_path, metrics_path)
         return
+
+    # 读取 optimizer 默认配置（含队长阈值）
+    try:
+        cfg_path_opt = Path("configs/base.yaml")
+        if cfg_path_opt.exists():
+            with open(cfg_path_opt, encoding="utf-8") as f:
+                cfg_opt_all = yaml.safe_load(f) or {}
+            opt_cfg = cfg_opt_all.get("optimizer") or {}
+            if captain_min_minutes is None and opt_cfg.get("captain_min_minutes") is not None:
+                captain_min_minutes = float(opt_cfg.get("captain_min_minutes"))
+            if captain_min_price is None and opt_cfg.get("captain_min_price") is not None:
+                captain_min_price = float(opt_cfg.get("captain_min_price"))
+    except Exception:
+        pass
+
     _progress("loading predictions parquet")
     preds = pd.read_parquet(data_dir / "processed" / f"predictions_gw{gw:02d}.parquet")
     _progress(f"predictions loaded: {len(preds)} rows")
@@ -157,6 +203,9 @@ def main(
     _progress(f"squad loaded: {len(squad.player_ids)} players, bank={squad.bank}")
     current_ids = [int(x) for x in squad.player_ids]
     current_pred = preds[preds["player_id"].isin(current_ids)].copy()
+    cap_minutes_current, cap_price_current = _resolve_captain_thresholds(
+        current_pred, captain_min_minutes, captain_min_price, "current XI"
+    )
     if len(current_ids) != 15:
         _progress("initial squad missing -> build_initial_squad begin")
         xi = {
@@ -207,13 +256,24 @@ def main(
         init_ids = init_res["player_ids"]
         init_pred = preds[preds["player_id"].isin(init_ids)].copy()
         _progress("solve_starting_xi for initial suggestion begin")
-        xi_initial = solve_starting_xi(init_pred)
+        init_cap_minutes, init_cap_price = _resolve_captain_thresholds(
+            init_pred, captain_min_minutes, captain_min_price, "initial XI"
+        )
+        xi_initial = solve_starting_xi(
+            init_pred,
+            captain_min_minutes=init_cap_minutes,
+            captain_min_price=init_cap_price,
+        )
         _progress("solve_starting_xi for initial suggestion done")
         # 顶部展示直接采用初始阵容的 XI/Bench，避免空表
         xi = xi_initial
     else:
         _progress("solve_starting_xi begin")
-        xi = solve_starting_xi(current_pred)
+        xi = solve_starting_xi(
+            current_pred,
+            captain_min_minutes=cap_minutes_current,
+            captain_min_price=cap_price_current,
+        )
         _progress("solve_starting_xi done")
         skip_transfers = False
 
@@ -266,6 +326,8 @@ def main(
             price_now_market=preds.set_index("player_id")["price_now"].to_dict(),
             purchase_prices=purchase_prices,
             value_weight=0.0,
+            captain_min_minutes=captain_min_minutes,
+            captain_min_price=captain_min_price,
         )
         _progress("best_transfers done")
         bp = res["best_plan"]
@@ -274,7 +336,14 @@ def main(
             after_ids = bp.get("new_squad_ids", [])
             after_pred = preds[preds["player_id"].isin(after_ids)].copy()
             _progress("solve_starting_xi for after-transfers begin")
-            xi_after = solve_starting_xi(after_pred)
+            after_cap_minutes, after_cap_price = _resolve_captain_thresholds(
+                after_pred, captain_min_minutes, captain_min_price, "after-transfers XI"
+            )
+            xi_after = solve_starting_xi(
+                after_pred,
+                captain_min_minutes=after_cap_minutes,
+                captain_min_price=after_cap_price,
+            )
             _progress("solve_starting_xi for after-transfers done")
         except Exception:
             xi_after = None

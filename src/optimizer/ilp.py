@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 import pulp
 
@@ -54,6 +55,8 @@ def solve_starting_xi(
     *,
     formation: FormationBounds | None = None,
     bench_params: BenchOrderParams | None = None,
+    captain_min_minutes: float | None = None,
+    captain_min_price: float | None = None,
 ) -> dict:
     """
     给定 15 人阵容的预测表（含 expected_points / position），求最优首发 + 队长。
@@ -69,6 +72,12 @@ def solve_starting_xi(
 
     players = df["player_id"].astype(int).tolist()
     ep = {int(r.player_id): float(r.expected_points) for r in df.itertuples()}
+    minutes_map = (
+        df.set_index("player_id")["minutes"].to_dict() if "minutes" in df.columns else {}
+    )
+    price_map = (
+        df.set_index("player_id")["price_now"].to_dict() if "price_now" in df.columns else {}
+    )
 
     x = pulp.LpVariable.dicts("x", players, lowBound=0, upBound=1, cat=pulp.LpBinary)
     c = pulp.LpVariable.dicts("c", players, lowBound=0, upBound=1, cat=pulp.LpBinary)
@@ -91,6 +100,25 @@ def solve_starting_xi(
     for i in players:
         prob += c[i] <= x[i]
     prob += pulp.lpSum(c[i] for i in players) == 1
+
+    eligible_captain = set(players)
+    if captain_min_minutes is not None:
+        eligible_captain = {
+            i
+            for i in eligible_captain
+            if float(minutes_map.get(i, 0.0)) >= captain_min_minutes
+        }
+    if captain_min_price is not None:
+        eligible_captain = {
+            i
+            for i in eligible_captain
+            if not np.isnan(float(price_map.get(i, 0.0)))
+            and float(price_map.get(i, 0.0)) >= captain_min_price
+        }
+    if eligible_captain:
+        for i in players:
+            if i not in eligible_captain:
+                prob += c[i] == 0
 
     prob.solve(pulp.PULP_CBC_CMD(msg=False))
     if pulp.LpStatus[prob.status] != "Optimal":

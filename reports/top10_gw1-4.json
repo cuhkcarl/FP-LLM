@@ -1,0 +1,92 @@
+[
+  {
+    "id": 430,
+    "web_name": "Haaland",
+    "team": "MCI",
+    "position": "FWD",
+    "total_points": 37,
+    "goals_scored": 5,
+    "assists": 0
+  },
+  {
+    "id": 82,
+    "web_name": "Semenyo",
+    "team": "BOU",
+    "position": "MID",
+    "total_points": 36,
+    "goals_scored": 3,
+    "assists": 2
+  },
+  {
+    "id": 8,
+    "web_name": "J.Timber",
+    "team": "ARS",
+    "position": "DEF",
+    "total_points": 34,
+    "goals_scored": 2,
+    "assists": 1
+  },
+  {
+    "id": 7,
+    "web_name": "Calafiori",
+    "team": "ARS",
+    "position": "DEF",
+    "total_points": 33,
+    "goals_scored": 1,
+    "assists": 2
+  },
+  {
+    "id": 249,
+    "web_name": "João Pedro",
+    "team": "CHE",
+    "position": "FWD",
+    "total_points": 33,
+    "goals_scored": 2,
+    "assists": 3
+  },
+  {
+    "id": 226,
+    "web_name": "Chalobah",
+    "team": "CHE",
+    "position": "DEF",
+    "total_points": 30,
+    "goals_scored": 1,
+    "assists": 1
+  },
+  {
+    "id": 237,
+    "web_name": "Enzo",
+    "team": "CHE",
+    "position": "MID",
+    "total_points": 29,
+    "goals_scored": 2,
+    "assists": 2
+  },
+  {
+    "id": 241,
+    "web_name": "Caicedo",
+    "team": "CHE",
+    "position": "MID",
+    "total_points": 29,
+    "goals_scored": 2,
+    "assists": 0
+  },
+  {
+    "id": 260,
+    "web_name": "Guéhi",
+    "team": "CRY",
+    "position": "DEF",
+    "total_points": 29,
+    "goals_scored": 1,
+    "assists": 0
+  },
+  {
+    "id": 565,
+    "web_name": "Vicario",
+    "team": "TOT",
+    "position": "GK",
+    "total_points": 29,
+    "goals_scored": 0,
+    "assists": 0
+  }
+]

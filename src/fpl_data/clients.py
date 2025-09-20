@@ -6,7 +6,7 @@ import logging
 import threading
 import time
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +21,7 @@ _last_request_ts = 0.0
 _lock = threading.Lock()
 
 DEFAULT_CACHE_DIR = Path("data/raw/http_cache")
+UTC = timezone.utc
 
 
 @dataclass(frozen=True)

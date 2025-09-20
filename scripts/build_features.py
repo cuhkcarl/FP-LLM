@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from datetime import UTC
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
 
 import numpy as np
 import pandas as pd
 import typer
+import yaml
 
 from fpl_data.loaders import build_all
 from fpl_data.transforms import run_clean
+
+UTC = timezone.utc
 
 app = typer.Typer(add_completion=False)
 
@@ -17,6 +20,11 @@ app = typer.Typer(add_completion=False)
 # ---- 可调系数（也可后续移到 configs/base.yaml） ----
 ALPHA_BY_POS: dict[str, float] = {"GK": 0.10, "DEF": 0.10, "MID": 0.08, "FWD": 0.06}  # FDR 惩罚强度
 BETA_HOME_BY_POS: dict[str, float] = {"GK": 0.02, "DEF": 0.03, "MID": 0.03, "FWD": 0.04}  # 主场奖励
+DEFAULT_RANKING_PARAMS = {
+    "shrink_k": 3.0,
+    "minutes_penalty": 1.0,
+    "price_weight": 0.1,
+}
 STATUS_WEIGHT = {"a": 1.0, "d": 0.6, "i": 0.2, "s": 0.0}  # available/doubtful/injured/suspended
 
 
@@ -136,6 +144,25 @@ def _apply_fdr_home_adjustment(base: float, pos: str, mean_fdr: float, home_rati
     return max(0.0, base * fdr_term * home_term)
 
 
+def _load_ranking_params(config_path: Path | None) -> dict[str, float]:
+    params = DEFAULT_RANKING_PARAMS.copy()
+    if config_path is None or not config_path.exists():
+        return params
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        ranking = ((cfg.get("prediction") or {}).get("ranking") or {})
+        if "shrink_k" in ranking:
+            params["shrink_k"] = float(ranking["shrink_k"])
+        if "minutes_penalty" in ranking:
+            params["minutes_penalty"] = float(ranking["minutes_penalty"])
+        if "price_weight" in ranking:
+            params["price_weight"] = float(ranking["price_weight"])
+    except Exception:
+        pass
+    return params
+
+
 @app.command()
 def main(
     raw_dir: Annotated[Path, typer.Option(help="原始 JSON 目录")] = Path("data/raw/fpl"),
@@ -145,6 +172,7 @@ def main(
         int | None, typer.Option(help="当前 Gameweek（用于选择未来赛程）；不填则按时间")
     ] = None,
     k: Annotated[int, typer.Option(help="未来 K 场用于 FDR/主客统计")] = 3,
+    config_path: Annotated[Path, typer.Option(help="配置文件路径") ] = Path("configs/base.yaml"),
 ):
     """
     M2：基于 players_clean / fixtures_clean 生成可用于 M3 的统一特征表：
@@ -154,8 +182,6 @@ def main(
       - fdr_adjusted_recent_score
       - 基础画像：price_now / selected_by_pct / position / team_short ...
     """
-    from datetime import datetime
-
     _ensure_dir(out_dir)
     build_all(raw_dir, interim_dir)
     run_clean(interim_dir, interim_dir)
@@ -188,8 +214,32 @@ def main(
     df["availability_score"] = avail[0]
     df["likely_starter"] = avail[1].astype(bool)
 
+    ranking_params = _load_ranking_params(config_path if config_path.exists() else None)
+    shrink_k = ranking_params["shrink_k"]
+    minutes_penalty = ranking_params["minutes_penalty"]
+    price_weight = ranking_params["price_weight"]
+
     # 4) 最近表现代理分（form + points/90）
     df["recent_score_wma"] = df.apply(_base_recent_score, axis=1)
+
+    # 4.1) 按分钟做样本量收缩，避免单轮噪声
+    minutes_numeric = pd.to_numeric(df.get("minutes"), errors="coerce").fillna(0.0)
+    n_matches = minutes_numeric / 90.0
+    shrink = (n_matches / (n_matches + shrink_k)).clip(lower=0.0, upper=1.0)
+    pos_mean = df.groupby("position")["recent_score_wma"].transform("mean")
+    overall_mean = float(df["recent_score_wma"].mean()) if not df["recent_score_wma"].isna().all() else 0.0
+    pos_mean = pos_mean.fillna(overall_mean)
+    minutes_ratio = np.clip(minutes_numeric / 90.0, 0.0, 1.0)
+    availability = pd.to_numeric(df.get("availability_score"), errors="coerce").fillna(0.5)
+    fallback = pos_mean - minutes_penalty * (1.0 - minutes_ratio)
+    fallback -= 0.5 * (1.0 - availability)
+    df["recent_score_wma"] = shrink * df["recent_score_wma"] + (1.0 - shrink) * fallback
+
+    price = pd.to_numeric(df.get("price_now"), errors="coerce")
+    price_mu = float(price.mean()) if not np.isnan(price).all() else 0.0
+    price_sigma = float(price.std(ddof=0)) or 1.0
+    price_scaled = (price.fillna(price_mu) - price_mu) / price_sigma
+    df["recent_score_wma"] = df["recent_score_wma"] + price_weight * price_scaled
 
     # 5) FDR/主场 修正
     df["fdr_adjusted_recent_score"] = df.apply(
