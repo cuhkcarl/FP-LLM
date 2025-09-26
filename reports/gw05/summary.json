@@ -1,0 +1,137 @@
+{
+  "gw": 5,
+  "xi": {
+    "starting_ids": [
+      83,
+      47,
+      82,
+      119,
+      237,
+      624,
+      6,
+      525,
+      1,
+      476,
+      258
+    ],
+    "bench_ids": [
+      64,
+      410,
+      402,
+      253
+    ],
+    "captain_id": 82,
+    "vice_id": 83,
+    "expected_points_xi_with_captain": 63.94262766983585,
+    "bench_ep": 14.952334064232204
+  },
+  "transfers": {
+    "baseline_points": 63.94262766983585,
+    "transfers": 1,
+    "out_ids": [
+      237
+    ],
+    "in_ids": [
+      299
+    ],
+    "hit_cost": 0,
+    "new_points": 65.74921860190864,
+    "net_gain": 1.8065909320727869,
+    "bank_after": 3.4,
+    "team_value_now": 99.7,
+    "team_value_after": 99.7,
+    "team_value_delta": 0.0,
+    "new_squad_ids": [
+      82,
+      299,
+      525,
+      47,
+      1,
+      83,
+      6,
+      402,
+      476,
+      258,
+      410,
+      253,
+      64,
+      624,
+      119
+    ]
+  },
+  "xi_after": {
+    "starting_ids": [
+      299,
+      83,
+      47,
+      82,
+      119,
+      624,
+      6,
+      525,
+      1,
+      476,
+      258
+    ],
+    "bench_ids": [
+      64,
+      410,
+      402,
+      253
+    ],
+    "captain_id": 82,
+    "vice_id": 299,
+    "expected_points_xi_with_captain": 65.74921860190864
+  },
+  "initial_squad": null,
+  "chips": {
+    "bench_boost": {
+      "recommended": false,
+      "reason": "bench EP below threshold",
+      "metrics": {
+        "bench_ep": 14.952334064232204
+      }
+    },
+    "triple_captain": {
+      "recommended": false,
+      "reason": "captain EP below threshold",
+      "metrics": {
+        "captain_ep": 5.6795202546549275,
+        "captain_double": false
+      }
+    },
+    "free_hit": {
+      "recommended": false,
+      "reason": "enough active starters",
+      "metrics": {
+        "active_likely_starters": 14
+      }
+    },
+    "wildcard": {
+      "recommended": false,
+      "reason": "not auto-triggered (needs structural check)",
+      "metrics": {}
+    }
+  },
+  "thresholds": {
+    "bench_boost_min_bench_ep": 20.0,
+    "triple_captain_min_ep": 9.0,
+    "triple_captain_min_ep_if_double": 7.5,
+    "free_hit_min_active_starters": 9
+  },
+  "blacklist": {
+    "names": [
+      "Mohamed Salah",
+      "Erling Haaland"
+    ],
+    "price_min": 13.0
+  },
+  "whitelist": {
+    "names": null
+  },
+  "optimizer": {
+    "value_weight": 0.0,
+    "min_bank_after": null,
+    "max_tv_drop": null
+  }
+}
