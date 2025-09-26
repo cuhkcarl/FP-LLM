@@ -33,7 +33,6 @@ The system follows a pipeline approach with distinct modules:
 python -m venv .fpllm
 source .fpllm/bin/activate  # macOS/Linux
 pip install -e ".[dev]"
-pre-commit install
 ```
 
 ### Code Quality Checks

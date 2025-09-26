@@ -9,7 +9,7 @@
 
 ## 功能概览（进度）
 
-- ✅ **M0 工程化**：`uv`/venv、pre-commit、ruff/black/isort/mypy、pytest、CI。
+- ✅ **M0 工程化**：`uv`/venv、ruff/black/isort/mypy、pytest、CI。
 - ✅ **M1 数据层**：拉取 FPL 公开端点（`bootstrap-static/`、`fixtures/` 等），标准化与清洗为 Parquet。
 - ✅ **M2 特征工程**：未来 K 场 **FDR/主客修正**、**出场稳定性**、**近期表现代理** → `features[_gwXX].parquet`。
 - ✅ **M3 基线预测**：位置内标准化 + 可用性加权 → 下一轮 `expected_points` → `predictions[_gwXX].parquet`。
@@ -30,7 +30,6 @@ source .fpllm/bin/activate  # macOS/Linux
 # .\.fpllm\Scripts\Activate.ps1  # Windows
 
 pip install -e ".[dev]"
-pre-commit install
 ```
 
 > 国内加速（仅当前 venv 生效）：在 `.venv/pip.conf` 写入

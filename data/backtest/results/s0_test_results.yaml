@@ -1,0 +1,217 @@
+strategy_name: S0Strategy
+season: 2023-24
+gameweeks_completed: 3
+gameweek_range: GW1-GW3
+total_points: 186
+average_points_per_gw: 62.0
+points_std: 16.87
+best_gw:
+  gw: 1
+  score: 79
+  cumulative_score: 79
+  lineup:
+    gw: 1
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 131
+      - 398
+      - 430
+      MID:
+      - 19
+      - 143
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 13
+worst_gw:
+  gw: 3
+  score: 39
+  cumulative_score: 186
+  lineup:
+    gw: 3
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 368
+      - 398
+      MID:
+      - 19
+      - 396
+      - 226
+      - 14
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 597
+    - 5
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 8
+consistency_score: 3.67
+gameweek_results:
+- gw: 1
+  score: 79
+  cumulative_score: 79
+  lineup:
+    gw: 1
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 131
+      - 398
+      - 430
+      MID:
+      - 19
+      - 143
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 13
+- gw: 2
+  score: 68
+  cumulative_score: 147
+  lineup:
+    gw: 2
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 430
+      - 398
+      MID:
+      - 143
+      - 14
+      - 19
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 143
+    bench:
+    - 597
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 143
+    name: Kaoru Mitoma
+    position: MID
+    score: 12
+- gw: 3
+  score: 39
+  cumulative_score: 186
+  lineup:
+    gw: 3
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 368
+      - 398
+      MID:
+      - 19
+      - 396
+      - 226
+      - 14
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 597
+    - 5
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 8
+execution_timestamp: '2025-09-20T16:07:49.765489'

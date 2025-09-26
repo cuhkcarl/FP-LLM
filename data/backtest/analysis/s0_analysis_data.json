@@ -1,0 +1,210 @@
+{
+  "strategy_name": "S0",
+  "analysis_timestamp": "2025-09-20T16:58:27.231163",
+  "summary": {
+    "season": "2023-24",
+    "total_points": 1992,
+    "gameweeks_completed": 36,
+    "average_points_per_gw": 55.33,
+    "points_std": 17.85
+  },
+  "detailed_analysis": {
+    "basic_metrics": {
+      "total_gameweeks": 36,
+      "total_points": 1992,
+      "average_points": 55.333333333333336,
+      "median_points": 58.0,
+      "std_points": 18.098145129898178,
+      "min_points": 16,
+      "max_points": 91,
+      "percentiles": {
+        "25th": 41.5,
+        "75th": 68.25,
+        "90th": 79.5
+      },
+      "score_distribution": {
+        "excellent_weeks": 8,
+        "good_weeks": 11,
+        "average_weeks": 9,
+        "poor_weeks": 8
+      }
+    },
+    "performance_rating": {
+      "grade": "B",
+      "label": "良好",
+      "description": "表现符合预期，策略有效",
+      "score": 55.33,
+      "vs_fpl_average": 2.8299999999999983
+    },
+    "consistency_analysis": {
+      "consistency_score": 0.753536963865432,
+      "coefficient_of_variation": 0.32707491198611166,
+      "label": "高稳定性",
+      "above_average_weeks": 19,
+      "below_average_weeks": 17,
+      "volatility_assessment": "medium"
+    },
+    "captain_analysis": {
+      "total_different_captains": 10,
+      "most_used_captain": {
+        "id": 355,
+        "name": "Erling Haaland",
+        "position": "FWD",
+        "team": "Man City",
+        "games_captained": 7,
+        "percentage": 19.444444444444446
+      },
+      "captain_distribution": [
+        {
+          "id": 355,
+          "name": "Erling Haaland",
+          "position": "FWD",
+          "team": "Man City",
+          "games_captained": 7,
+          "percentage": 19.444444444444446
+        },
+        {
+          "id": 19,
+          "name": "Bukayo Saka",
+          "position": "MID",
+          "team": "Arsenal",
+          "games_captained": 6,
+          "percentage": 16.666666666666664
+        },
+        {
+          "id": 430,
+          "name": "Kieran Trippier",
+          "position": "DEF",
+          "team": "Newcastle",
+          "games_captained": 6,
+          "percentage": 16.666666666666664
+        },
+        {
+          "id": 5,
+          "name": "Gabriel dos Santos Magalhães",
+          "position": "DEF",
+          "team": "Arsenal",
+          "games_captained": 5,
+          "percentage": 13.88888888888889
+        },
+        {
+          "id": 226,
+          "name": "Eberechi Eze",
+          "position": "MID",
+          "team": "Crystal Palace",
+          "games_captained": 3,
+          "percentage": 8.333333333333332
+        },
+        {
+          "id": 143,
+          "name": "Kaoru Mitoma",
+          "position": "MID",
+          "team": "Brighton",
+          "games_captained": 2,
+          "percentage": 5.555555555555555
+        },
+        {
+          "id": 14,
+          "name": "Martin Ødegaard",
+          "position": "MID",
+          "team": "Arsenal",
+          "games_captained": 2,
+          "percentage": 5.555555555555555
+        },
+        {
+          "id": 135,
+          "name": "João Pedro Junqueira de Jesus",
+          "position": "FWD",
+          "team": "Brighton",
+          "games_captained": 2,
+          "percentage": 5.555555555555555
+        },
+        {
+          "id": 524,
+          "name": "Alphonse Areola",
+          "position": "GK",
+          "team": "West Ham",
+          "games_captained": 2,
+          "percentage": 5.555555555555555
+        },
+        {
+          "id": 597,
+          "name": "André Onana",
+          "position": "GK",
+          "team": "Man Utd",
+          "games_captained": 1,
+          "percentage": 2.7777777777777777
+        }
+      ],
+      "captain_diversity": 0.2777777777777778
+    },
+    "formation_analysis": {
+      "total_formations_used": 1,
+      "primary_formation": "3-5-2",
+      "formation_distribution": [
+        {
+          "formation": "3-5-2",
+          "games_used": 36,
+          "percentage": 100.0
+        }
+      ],
+      "formation_diversity": 0.027777777777777776
+    },
+    "trend_analysis": {
+      "trend_slope": -0.3990450204638473,
+      "trend_direction": "declining",
+      "rolling_average": [
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        63.6,
+        66.0,
+        68.8,
+        68.2,
+        61.6,
+        61.6,
+        52.6,
+        48.0,
+        55.8,
+        59.0,
+        54.6,
+        48.6,
+        45.2,
+        39.2,
+        38.8,
+        44.2,
+        53.8,
+        58.4,
+        61.4,
+        66.0,
+        68.4,
+        63.6,
+        65.2,
+        59.6,
+        49.8,
+        45.2,
+        45.6,
+        43.2,
+        44.4,
+        52.2,
+        48.8,
+        52.4
+      ],
+      "first_half_average": 55.666666666666664,
+      "second_half_average": 55.0,
+      "half_performance_change": -0.6666666666666643
+    },
+    "comparative_analysis": {
+      "vs_fpl_average": {
+        "difference": 2.8299999999999983,
+        "percentage_better": 5.39047619047619,
+        "assessment": "above"
+      },
+      "vs_excellence_threshold": {
+        "difference": -4.670000000000002,
+        "reached_excellence": false
+      }
+    }
+  }
+}

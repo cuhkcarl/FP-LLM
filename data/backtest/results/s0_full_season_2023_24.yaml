@@ -1,0 +1,1576 @@
+strategy_name: S0Strategy
+season: 2023-24
+gameweeks_completed: 36
+gameweek_range: GW1-GW38
+total_points: 1992
+average_points_per_gw: 55.33
+points_std: 17.85
+best_gw:
+  gw: 6
+  score: 91
+  cumulative_score: 409
+  lineup:
+    gw: 6
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 430
+      - 131
+      - 5
+      MID:
+      - 143
+      - 19
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 430
+    bench:
+    - 524
+    - 368
+    - 398
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 18
+worst_gw:
+  gw: 16
+  score: 16
+  cumulative_score: 915
+  lineup:
+    gw: 16
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 368
+      - 398
+      MID:
+      - 19
+      - 14
+      - 143
+      - 396
+      - 226
+      FWD:
+      - 135
+      - 538
+    captain_id: 5
+    bench:
+    - 524
+    - 131
+    - 430
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 5
+    name: Gabriel dos Santos Magalhães
+    position: DEF
+    score: 2
+consistency_score: 3.1
+gameweek_results:
+- gw: 1
+  score: 79
+  cumulative_score: 79
+  lineup:
+    gw: 1
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 131
+      - 398
+      - 430
+      MID:
+      - 19
+      - 143
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 13
+- gw: 2
+  score: 68
+  cumulative_score: 147
+  lineup:
+    gw: 2
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 430
+      - 398
+      MID:
+      - 143
+      - 14
+      - 19
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 143
+    bench:
+    - 597
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 143
+    name: Kaoru Mitoma
+    position: MID
+    score: 12
+- gw: 3
+  score: 39
+  cumulative_score: 186
+  lineup:
+    gw: 3
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 368
+      - 398
+      MID:
+      - 19
+      - 396
+      - 226
+      - 14
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 597
+    - 5
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 8
+- gw: 4
+  score: 80
+  cumulative_score: 266
+  lineup:
+    gw: 4
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 5
+      - 131
+      - 430
+      MID:
+      - 226
+      - 396
+      - 14
+      - 143
+      - 19
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 597
+    - 368
+    - 398
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 20
+- gw: 5
+  score: 52
+  cumulative_score: 318
+  lineup:
+    gw: 5
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 430
+      - 5
+      - 368
+      MID:
+      - 19
+      - 14
+      - 143
+      - 396
+      - 226
+      FWD:
+      - 135
+      - 355
+    captain_id: 430
+    bench:
+    - 597
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 8
+- gw: 6
+  score: 91
+  cumulative_score: 409
+  lineup:
+    gw: 6
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 430
+      - 131
+      - 5
+      MID:
+      - 143
+      - 19
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 430
+    bench:
+    - 524
+    - 368
+    - 398
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 18
+- gw: 7
+  score: 82
+  cumulative_score: 491
+  lineup:
+    gw: 7
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 430
+      - 5
+      - 368
+      MID:
+      - 14
+      - 19
+      - 226
+      - 396
+      - 143
+      FWD:
+      - 135
+      - 355
+    captain_id: 14
+    bench:
+    - 597
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 14
+    name: Martin Ødegaard
+    position: MID
+    score: 17
+- gw: 8
+  score: 36
+  cumulative_score: 527
+  lineup:
+    gw: 8
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 430
+      - 368
+      MID:
+      - 14
+      - 143
+      - 396
+      - 19
+      - 226
+      FWD:
+      - 135
+      - 355
+    captain_id: 5
+    bench:
+    - 524
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 5
+    name: Gabriel dos Santos Magalhães
+    position: DEF
+    score: 8
+- gw: 9
+  score: 47
+  cumulative_score: 574
+  lineup:
+    gw: 9
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 430
+      - 368
+      - 5
+      MID:
+      - 19
+      - 143
+      - 396
+      - 14
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 430
+    bench:
+    - 524
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 10
+- gw: 10
+  score: 52
+  cumulative_score: 626
+  lineup:
+    gw: 10
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 368
+      - 398
+      - 5
+      MID:
+      - 19
+      - 143
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 597
+    - 131
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 16
+- gw: 11
+  score: 46
+  cumulative_score: 672
+  lineup:
+    gw: 11
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 430
+      - 368
+      - 5
+      MID:
+      - 143
+      - 226
+      - 19
+      - 396
+      - 14
+      FWD:
+      - 135
+      - 355
+    captain_id: 430
+    bench:
+    - 524
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 9
+- gw: 12
+  score: 59
+  cumulative_score: 731
+  lineup:
+    gw: 12
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 430
+      - 368
+      MID:
+      - 226
+      - 19
+      - 396
+      - 143
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 16
+- gw: 13
+  score: 75
+  cumulative_score: 806
+  lineup:
+    gw: 13
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 398
+      - 5
+      - 430
+      MID:
+      - 396
+      - 19
+      - 14
+      - 226
+      - 143
+      FWD:
+      - 135
+      - 355
+    captain_id: 135
+    bench:
+    - 524
+    - 368
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 135
+    name: João Pedro Junqueira de Jesus
+    position: FWD
+    score: 13
+- gw: 14
+  score: 63
+  cumulative_score: 869
+  lineup:
+    gw: 14
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 430
+      - 398
+      - 5
+      MID:
+      - 14
+      - 19
+      - 396
+      - 143
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 430
+    bench:
+    - 524
+    - 368
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 12
+- gw: 15
+  score: 30
+  cumulative_score: 899
+  lineup:
+    gw: 15
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 368
+      - 398
+      - 5
+      MID:
+      - 143
+      - 19
+      - 14
+      - 396
+      - 226
+      FWD:
+      - 135
+      - 355
+    captain_id: 143
+    bench:
+    - 524
+    - 131
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 143
+    name: Kaoru Mitoma
+    position: MID
+    score: 5
+- gw: 16
+  score: 16
+  cumulative_score: 915
+  lineup:
+    gw: 16
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 368
+      - 398
+      MID:
+      - 19
+      - 14
+      - 143
+      - 396
+      - 226
+      FWD:
+      - 135
+      - 538
+    captain_id: 5
+    bench:
+    - 524
+    - 131
+    - 430
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 5
+    name: Gabriel dos Santos Magalhães
+    position: DEF
+    score: 2
+- gw: 17
+  score: 42
+  cumulative_score: 957
+  lineup:
+    gw: 17
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 398
+      - 368
+      MID:
+      - 19
+      - 14
+      - 143
+      - 226
+      - 396
+      FWD:
+      - 135
+      - 538
+    captain_id: 597
+    bench:
+    - 524
+    - 131
+    - 430
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 597
+    name: André Onana
+    position: GK
+    score: 10
+- gw: 18
+  score: 45
+  cumulative_score: 1002
+  lineup:
+    gw: 18
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 5
+      - 430
+      - 398
+      MID:
+      - 14
+      - 143
+      - 396
+      - 19
+      - 226
+      FWD:
+      - 135
+      - 538
+    captain_id: 5
+    bench:
+    - 597
+    - 131
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 5
+    name: Gabriel dos Santos Magalhães
+    position: DEF
+    score: 10
+- gw: 19
+  score: 61
+  cumulative_score: 1063
+  lineup:
+    gw: 19
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 368
+      - 5
+      MID:
+      - 396
+      - 19
+      - 226
+      - 14
+      - 143
+      FWD:
+      - 135
+      - 538
+    captain_id: 135
+    bench:
+    - 597
+    - 398
+    - 430
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 135
+    name: João Pedro Junqueira de Jesus
+    position: FWD
+    score: 16
+- gw: 20
+  score: 57
+  cumulative_score: 1120
+  lineup:
+    gw: 20
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 5
+      - 368
+      MID:
+      - 226
+      - 396
+      - 19
+      - 14
+      - 143
+      FWD:
+      - 135
+      - 538
+    captain_id: 524
+    bench:
+    - 597
+    - 398
+    - 430
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 524
+    name: Alphonse Areola
+    position: GK
+    score: 11
+- gw: 21
+  score: 64
+  cumulative_score: 1184
+  lineup:
+    gw: 21
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 5
+      - 131
+      - 430
+      MID:
+      - 396
+      - 19
+      - 14
+      - 226
+      - 143
+      FWD:
+      - 135
+      - 538
+    captain_id: 5
+    bench:
+    - 597
+    - 368
+    - 398
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 5
+    name: Gabriel dos Santos Magalhães
+    position: DEF
+    score: 17
+- gw: 22
+  score: 65
+  cumulative_score: 1249
+  lineup:
+    gw: 22
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 430
+      - 398
+      - 368
+      MID:
+      - 226
+      - 19
+      - 396
+      - 14
+      - 143
+      FWD:
+      - 135
+      - 355
+    captain_id: 226
+    bench:
+    - 597
+    - 5
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 226
+    name: Eberechi Eze
+    position: MID
+    score: 14
+- gw: 23
+  score: 60
+  cumulative_score: 1309
+  lineup:
+    gw: 23
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 430
+      - 398
+      - 131
+      MID:
+      - 19
+      - 396
+      - 14
+      - 143
+      - 226
+      FWD:
+      - 135
+      - 355
+    captain_id: 430
+    bench:
+    - 524
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 430
+    name: Kieran Trippier
+    position: DEF
+    score: 9
+- gw: 24
+  score: 84
+  cumulative_score: 1393
+  lineup:
+    gw: 24
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 368
+      - 430
+      MID:
+      - 19
+      - 14
+      - 143
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 524
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 15
+- gw: 25
+  score: 69
+  cumulative_score: 1462
+  lineup:
+    gw: 25
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 5
+      - 368
+      - 131
+      MID:
+      - 19
+      - 14
+      - 143
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 355
+    captain_id: 19
+    bench:
+    - 597
+    - 398
+    - 430
+    - 135
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 15
+- gw: 26
+  score: 40
+  cumulative_score: 1502
+  lineup:
+    gw: 26
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 368
+      - 5
+      - 131
+      MID:
+      - 19
+      - 396
+      - 14
+      - 143
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 597
+    - 398
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 10
+- gw: 27
+  score: 73
+  cumulative_score: 1575
+  lineup:
+    gw: 27
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 5
+      - 368
+      - 430
+      MID:
+      - 14
+      - 226
+      - 396
+      - 19
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 524
+    bench:
+    - 597
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 524
+    name: Alphonse Areola
+    position: GK
+    score: 13
+- gw: 30
+  score: 32
+  cumulative_score: 1607
+  lineup:
+    gw: 30
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 131
+      - 368
+      MID:
+      - 226
+      - 396
+      - 19
+      - 14
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 5
+    bench:
+    - 524
+    - 398
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 5
+    name: Gabriel dos Santos Magalhães
+    position: DEF
+    score: 6
+- gw: 31
+  score: 35
+  cumulative_score: 1642
+  lineup:
+    gw: 31
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 368
+      - 398
+      MID:
+      - 14
+      - 226
+      - 396
+      - 143
+      - 19
+      FWD:
+      - 135
+      - 538
+    captain_id: 14
+    bench:
+    - 524
+    - 131
+    - 430
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 14
+    name: Martin Ødegaard
+    position: MID
+    score: 11
+- gw: 32
+  score: 46
+  cumulative_score: 1688
+  lineup:
+    gw: 32
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 368
+      - 131
+      MID:
+      - 19
+      - 14
+      - 396
+      - 226
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 524
+    - 398
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 10
+- gw: 33
+  score: 42
+  cumulative_score: 1730
+  lineup:
+    gw: 33
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 131
+      - 368
+      - 398
+      MID:
+      - 226
+      - 14
+      - 396
+      - 19
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 5
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 226
+    name: Eberechi Eze
+    position: MID
+    score: 10
+- gw: 34
+  score: 61
+  cumulative_score: 1791
+  lineup:
+    gw: 34
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 5
+      - 368
+      MID:
+      - 226
+      - 14
+      - 14
+      - 19
+      - 19
+      FWD:
+      - 135
+      - 538
+    captain_id: 226
+    bench:
+    - 524
+    - 398
+    - 131
+    - 430
+    - 143
+    - 396
+    - 355
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 226
+    name: Eberechi Eze
+    position: MID
+    score: 11
+- gw: 35
+  score: 38
+  cumulative_score: 1829
+  lineup:
+    gw: 35
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 368
+      - 398
+      MID:
+      - 19
+      - 14
+      - 143
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 19
+    bench:
+    - 524
+    - 131
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 19
+    name: Bukayo Saka
+    position: MID
+    score: 12
+- gw: 36
+  score: 74
+  cumulative_score: 1903
+  lineup:
+    gw: 36
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 5
+      - 368
+      - 398
+      MID:
+      - 19
+      - 226
+      - 14
+      - 143
+      - 396
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 597
+    - 131
+    - 430
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 21
+- gw: 37
+  score: 29
+  cumulative_score: 1932
+  lineup:
+    gw: 37
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 430
+      - 430
+      MID:
+      - 226
+      - 14
+      - 19
+      - 396
+      - 143
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 368
+    - 368
+    - 398
+    - 398
+    - 131
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 226
+    name: Eberechi Eze
+    position: MID
+    score: 8
+- gw: 38
+  score: 60
+  cumulative_score: 1992
+  lineup:
+    gw: 38
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 5
+      - 430
+      - 368
+      MID:
+      - 226
+      - 14
+      - 396
+      - 143
+      - 19
+      FWD:
+      - 135
+      - 355
+    captain_id: 226
+    bench:
+    - 524
+    - 398
+    - 131
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 226
+    name: Eberechi Eze
+    position: MID
+    score: 18
+execution_timestamp: '2025-09-20T16:25:23.115945'

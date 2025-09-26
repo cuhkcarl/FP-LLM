@@ -1,0 +1,135 @@
+# 回测分析器配置文件
+# 定义评级标准、策略特征和基准值
+
+grading_standards:
+  performance:
+    - min: 65    # 优秀门槛
+      grade: "A+"
+      label: "卓越"
+      description: "表现远超预期，属于顶级策略"
+    - min: 60
+      grade: "A"
+      label: "优秀"
+      description: "表现超出预期，策略效果显著"
+    - min: 55
+      grade: "B"
+      label: "良好"
+      description: "表现符合预期，策略有效"
+    - min: 50
+      grade: "C"
+      label: "一般"
+      description: "表现略低于预期，有改进空间"
+    - min: 45
+      grade: "D"
+      label: "较差"
+      description: "表现明显低于预期，需要重大调整"
+    - min: 0
+      grade: "F"
+      label: "失败"
+      description: "策略表现不佳，需要重新设计"
+
+  consistency:
+    - min: 0.85
+      label: "极高稳定性"
+    - min: 0.75
+      label: "高稳定性"
+    - min: 0.65
+      label: "中等稳定性"
+    - min: 0.50
+      label: "低稳定性"
+    - min: 0.0
+      label: "极不稳定"
+
+  risk_levels:
+    - max_cv: 0.25
+      label: "低风险"
+    - max_cv: 0.40
+      label: "中等风险"
+    - max_cv: 1.0
+      label: "高风险"
+
+benchmarks:
+  fpl_average_per_gw: 52.5      # FPL典型平均分/周
+  good_consistency_threshold: 0.7  # 良好稳定性门槛
+  excellent_avg_threshold: 60     # 卓越表现门槛
+  top_10k_avg_threshold: 65      # 前10K平均水平
+  poor_performance_threshold: 45  # 较差表现门槛
+
+strategy_profiles:
+  S0:
+    name: "静态基准策略"
+    description: "基于群体智慧的静态最优阵容策略"
+    characteristics:
+      - "使用预计算的15人最优阵容，基于赛季开始时的球员拥有率"
+      - "每周从固定阵容中选择11人首发，无转会操作"
+      - "队长选择基于当周预期得分，追求最大化单周收益"
+      - "策略执行简单，无需复杂决策，适合作为基准对比"
+    expected_performance: "中等偏上"
+    risk_level: "低"
+    complexity: "简单"
+    transfer_frequency: "无"
+    chip_usage: "无"
+
+  S1:
+    name: "转会策略"
+    description: "在S0基础上增加转会决策的动态策略"
+    characteristics:
+      - "基于S0的15人阵容作为起点"
+      - "根据伤病、停赛、表现等信息进行转会决策"
+      - "保持预算平衡，最大化阵容价值"
+      - "动态队长选择，考虑固定阵容和DGW等因素"
+    expected_performance: "良好"
+    risk_level: "中等"
+    complexity: "中等"
+    transfer_frequency: "每周0-2次"
+    chip_usage: "无"
+
+  S2:
+    name: "完整策略"
+    description: "包含转会和芯片使用的完整FPL策略"
+    characteristics:
+      - "继承S1的转会决策能力"
+      - "智能使用Free Hit、Bench Boost、Triple Captain等芯片"
+      - "考虑DGW、BGW等特殊gameweek的策略调整"
+      - "全面的风险管理和收益最大化"
+    expected_performance: "优秀"
+    risk_level: "中等"
+    complexity: "复杂"
+    transfer_frequency: "每周0-3次"
+    chip_usage: "智能时机"
+
+analysis_templates:
+  executive_summary:
+    - "策略在{season}赛季的表现评级为{grade}级({label})"
+    - "完成{completed_weeks}周回测，总得分{total_points}分，平均{avg_points:.1f}分/周"
+    - "相比FPL平均水平({fpl_avg}分/周){comparison}，{performance_assessment}"
+    - "稳定性评估为{stability_label}，适合{risk_tolerance}投资者"
+
+  key_insights:
+    excellence: "策略表现卓越，超越绝大多数FPL玩家水平"
+    good: "策略表现良好，明显优于平均水平"
+    average: "策略表现中等，接近FPL平均水平"
+    poor: "策略表现不佳，需要优化调整"
+
+  recommendations:
+    high_consistency: "保持当前策略，可考虑适度优化以提升收益"
+    medium_consistency: "策略基本可行，建议重点提升稳定性"
+    low_consistency: "策略波动较大，需要加强风险控制"
+
+reporting:
+  sections:
+    - strategy_overview
+    - performance_analysis
+    - consistency_assessment
+    - captain_strategy
+    - formation_analysis
+    - benchmark_comparison
+    - trend_analysis
+    - comprehensive_evaluation
+
+  charts:
+    - weekly_scores_line
+    - score_distribution_histogram
+    - rolling_average_trend
+    - captain_usage_pie
+    - formation_usage_bar

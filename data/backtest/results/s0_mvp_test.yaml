@@ -1,0 +1,176 @@
+strategy_name: S0Strategy
+season: 2023-24
+gameweeks_completed: 2
+gameweek_range: GW1-GW2
+total_points: 147
+average_points_per_gw: 73.5
+points_std: 5.5
+best_gw:
+  gw: 1
+  score: 79
+  cumulative_score: 79
+  lineup:
+    gw: 1
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 131
+      - 398
+      - 430
+      MID:
+      - 19
+      - 143
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 13
+worst_gw:
+  gw: 2
+  score: 68
+  cumulative_score: 147
+  lineup:
+    gw: 2
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 430
+      - 398
+      MID:
+      - 143
+      - 14
+      - 19
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 143
+    bench:
+    - 597
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 143
+    name: Kaoru Mitoma
+    position: MID
+    score: 12
+consistency_score: 13.36
+gameweek_results:
+- gw: 1
+  score: 79
+  cumulative_score: 79
+  lineup:
+    gw: 1
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 597
+      DEF:
+      - 131
+      - 398
+      - 430
+      MID:
+      - 19
+      - 143
+      - 396
+      - 226
+      - 14
+      FWD:
+      - 355
+      - 135
+    captain_id: 355
+    bench:
+    - 524
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 355
+    name: Erling Haaland
+    position: FWD
+    score: 13
+- gw: 2
+  score: 68
+  cumulative_score: 147
+  lineup:
+    gw: 2
+    strategy: S0
+    formation: 3-5-2
+    lineup:
+      GK:
+      - 524
+      DEF:
+      - 131
+      - 430
+      - 398
+      MID:
+      - 143
+      - 14
+      - 19
+      - 396
+      - 226
+      FWD:
+      - 355
+      - 135
+    captain_id: 143
+    bench:
+    - 597
+    - 368
+    - 5
+    - 538
+    transfers: []
+    chips_used: []
+    total_starters: 11
+    metadata:
+      strategy_type: static_baseline
+      squad_unchanged: true
+      decision_method: predicted_points_ranking
+  top_scorer:
+    id: 143
+    name: Kaoru Mitoma
+    position: MID
+    score: 12
+execution_timestamp: '2025-09-20T16:10:01.653455'

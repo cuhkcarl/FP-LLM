@@ -1,0 +1,54 @@
+{
+  "season": "2023-24",
+  "total_gameweeks": 38,
+  "issues": {
+    "missing_files": [
+      28
+    ],
+    "incomplete_data": [
+      {
+        "gw": 29,
+        "player_count": 344
+      }
+    ],
+    "s0_coverage_issues": [
+      {
+        "gw": 18,
+        "found": 13,
+        "missing_count": 2,
+        "missing_ids": [
+          368,
+          355
+        ]
+      },
+      {
+        "gw": 29,
+        "found": 2,
+        "missing_count": 13,
+        "missing_ids": [
+          226,
+          131,
+          355,
+          5,
+          135,
+          396,
+          398,
+          143,
+          368,
+          430,
+          14,
+          19,
+          597
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "total_issues": 4,
+    "usable_gameweeks": 34,
+    "data_completeness": "34/38 (89.5%)",
+    "missing_file_count": 1,
+    "incomplete_data_count": 1,
+    "s0_coverage_issue_count": 2
+  }
+}

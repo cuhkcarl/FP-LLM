@@ -1,0 +1,109 @@
+name: "exp1_strategy_vs_benchmarks"
+
+# Historical seasons for backtesting (6 seasons: 2019/20 - 2024/25)
+seasons:
+  - "2019-20"
+  - "2020-21"
+  - "2021-22"
+  - "2022-23"
+  - "2023-24"
+  - "2024-25"
+
+# Current season for real-time validation
+current_season: "2025-26"
+
+# Strategy configurations
+strategies:
+  # S0: Static baseline - current squad, no transfers, no chips
+  - name: "S0_static_baseline"
+    type: "static"
+    config:
+      transfers_enabled: false
+      chips_enabled: false
+      optimize_xi_only: true
+    enabled: true
+
+  # S1: Transfers only - use transfers but no chips
+  - name: "S1_transfers_only"
+    type: "transfers_only"
+    config:
+      max_free_transfers: 1
+      max_hits: 0
+      chips_enabled: false
+      use_current_constraints: true  # Apply blacklist, etc.
+    enabled: true
+
+  # S2: Full strategy - user's complete current setup
+  - name: "S2_full_strategy"
+    type: "full"
+    config:
+      use_current_settings: true  # Import from configs/base.yaml
+      apply_blacklist: true
+      apply_dgw_adjust: true
+      chips_enabled: true
+    enabled: true
+
+  # S3: Unconstrained comparison - no blacklist
+  - name: "S3_unconstrained"
+    type: "full"
+    config:
+      use_current_settings: true
+      apply_blacklist: false  # Remove Salah/Haaland restriction
+      apply_dgw_adjust: true
+      chips_enabled: true
+    enabled: false  # Enable only for comparison analysis
+
+# Benchmark configurations
+benchmarks:
+  # B1: Official FPL averages and statistics
+  - name: "official_average"
+    type: "official"
+    config:
+      include_highest_score: true
+      include_most_captained: true
+      estimate_std_dev: true
+    enabled: true
+
+  # B2: Popular strategy baseline (casual players)
+  - name: "popularity_baseline"
+    type: "popularity"
+    config:
+      follow_most_selected: true
+      follow_most_captained: true
+      transfer_threshold: 0.1  # Transfer when >10% ownership change
+      chip_usage_rate: 0.3  # Use chips like 30% of population
+    enabled: true
+
+  # B3: Top 10k estimation
+  - name: "top10k_estimate"
+    type: "top10k"
+    config:
+      percentile_target: 99.1  # Top 10k ≈ 99.1st percentile
+      use_normal_approximation: true
+      historical_adjustment: true
+    enabled: true
+
+  # B4: Percentile distributions (sampling-based)
+  - name: "percentile_distribution"
+    type: "sampling"
+    config:
+      sample_size: 1000  # Number of managers to sample
+      percentiles: [10, 25, 50, 75, 90, 95]
+      cache_duration_days: 7
+    enabled: false  # Requires API sampling implementation
+
+# Data paths
+data_dir: "data"
+output_dir: "reports/backtest"
+
+# Parallel processing configuration (optimized for multi-core)
+parallel:
+  enabled: true
+  max_workers: null  # Auto-detect CPU cores (capped at 8)
+  strategy_parallel: true   # Run strategies simultaneously
+  season_parallel: false    # Keep seasons sequential for data dependencies
+  chunk_size: 1
+
+# Performance and caching
+cache_enabled: true
+memory_limit_gb: 16.0  # Memory usage limit

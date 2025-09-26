@@ -1,0 +1,132 @@
+optimal_squad_2023_24:
+  player_ids:
+  - 368
+  - 398
+  - 5
+  - 143
+  - 135
+  - 538
+  - 131
+  - 430
+  - 396
+  - 524
+  - 597
+  - 19
+  - 355
+  - 226
+  - 14
+  players:
+  - id: 355
+    name: Erling Haaland
+    position: FWD
+    team: Man City
+    price: 14.0
+    ownership: 7200159
+  - id: 19
+    name: Bukayo Saka
+    position: MID
+    team: Arsenal
+    price: 8.5
+    ownership: 4878155
+  - id: 131
+    name: "Pervis Estupi\xF1\xE1n"
+    position: DEF
+    team: Brighton
+    price: 5.0
+    ownership: 4354859
+  - id: 396
+    name: Marcus Rashford
+    position: MID
+    team: Man Utd
+    price: 9.0
+    ownership: 4107040
+  - id: 143
+    name: Kaoru Mitoma
+    position: MID
+    team: Brighton
+    price: 6.5
+    ownership: 3166456
+  - id: 5
+    name: "Gabriel dos Santos Magalh\xE3es"
+    position: DEF
+    team: Arsenal
+    price: 5.0
+    ownership: 2743150
+  - id: 430
+    name: Kieran Trippier
+    position: DEF
+    team: Newcastle
+    price: 6.5
+    ownership: 2707037
+  - id: 368
+    name: John Stones
+    position: DEF
+    team: Man City
+    price: 5.5
+    ownership: 2333274
+  - id: 597
+    name: "Andr\xE9 Onana"
+    position: GK
+    team: Man Utd
+    price: 5.0
+    ownership: 2252615
+  - id: 398
+    name: Luke Shaw
+    position: DEF
+    team: Man Utd
+    price: 5.5
+    ownership: 2192119
+  - id: 135
+    name: "Jo\xE3o Pedro Junqueira de Jesus"
+    position: FWD
+    team: Brighton
+    price: 5.5
+    ownership: 2090041
+  - id: 14
+    name: "Martin \xD8degaard"
+    position: MID
+    team: Arsenal
+    price: 8.5
+    ownership: 1941821
+  - id: 524
+    name: Alphonse Areola
+    position: GK
+    team: West Ham
+    price: 4.0
+    ownership: 1900454
+  - id: 226
+    name: Eberechi Eze
+    position: MID
+    team: Crystal Palace
+    price: 6.5
+    ownership: 1431792
+  - id: 538
+    name: Divin Mubama
+    position: FWD
+    team: West Ham
+    price: 4.5
+    ownership: 1006999
+  metadata:
+    season: 2023-24
+    total_value_millions: 99.5
+    remaining_budget_millions: 0.5
+    total_ownership: 44305971
+    optimization_method: crowd_wisdom_popularity
+    constraints_satisfied:
+    - exactly_15_players
+    - budget_limit
+    - position_quota_2gk_5def_5mid_3fwd
+    - max_3_per_team
+  team_distribution:
+    Arsenal: 3
+    Brighton: 3
+    Man Utd: 3
+    Man City: 2
+    West Ham: 2
+    Newcastle: 1
+    Crystal Palace: 1
+  position_distribution:
+    MID: 5
+    DEF: 5
+    FWD: 3
+    GK: 2
